@@ -1,0 +1,91 @@
+[gd_scene load_steps=10 format=3 uid="uid://c15passive001"]
+
+[ext_resource type="Script" path="res://scripts/world/PassiveMachine.gd" id="1_passive_machine"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_cap"]
+radius = 3.2
+height = 3.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ped"]
+albedo_color = Color(0.18, 0.15, 0.28, 1)
+metallic = 0.35
+roughness = 0.5
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_base"]
+material = SubResource("StandardMaterial3D_ped")
+top_radius = 1.3
+bottom_radius = 1.5
+height = 0.4
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_col"]
+material = SubResource("StandardMaterial3D_ped")
+top_radius = 0.7
+bottom_radius = 0.9
+height = 1.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_crystal"]
+albedo_color = Color(0.3, 0.9, 1, 1)
+metallic = 0.4
+roughness = 0.15
+emission_enabled = true
+emission = Color(0.1, 0.75, 1, 1)
+emission_energy_multiplier = 1.2
+
+[sub_resource type="PrismMesh" id="PrismMesh_crystal"]
+material = SubResource("StandardMaterial3D_crystal")
+size = Vector3(0.8, 1.2, 0.8)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sparkle"]
+shading_mode = 0
+albedo_color = Color(0.4, 0.9, 1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_sparkle"]
+material = SubResource("StandardMaterial3D_sparkle")
+size = Vector3(0.12, 0.12, 0.12)
+
+[node name="PassiveMachine" type="Area3D"]
+collision_layer = 1
+collision_mask = 2
+script = ExtResource("1_passive_machine")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("CylinderShape3D_cap")
+
+[node name="PedestalBase" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+mesh = SubResource("CylinderMesh_base")
+
+[node name="PedestalCol" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("CylinderMesh_col")
+
+[node name="CrystalMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 0, 2.2, 0)
+mesh = SubResource("PrismMesh_crystal")
+
+[node name="PromptLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.2, 0)
+visible = false
+billboard = 1
+text = "Máquina de Passivas
+[E] Rolar Passiva"
+font_size = 24
+outline_size = 6
+outline_modulate = Color(0, 0, 0, 1)
+
+[node name="SparkleParticles" type="CPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0, 0)
+emitting = true
+amount = 16
+lifetime = 1.2
+mesh = SubResource("BoxMesh_sparkle")
+emission_shape = 1
+emission_sphere_radius = 1.0
+direction = Vector3(0, 1, 0)
+spread = 30.0
+gravity = Vector3(0, 0.5, 0)
+initial_velocity_min = 0.5
+initial_velocity_max = 1.2
+scale_amount_min = 0.6
+scale_amount_max = 1.2

@@ -1,0 +1,192 @@
+[gd_scene load_steps=19 format=3 uid="uid://c6enemy001"]
+
+[ext_resource type="Script" path="res://scripts/entities/Enemy.gd" id="1_enemy"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_enemy"]
+radius = 0.55
+height = 2.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_shadow"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0, 0, 0, 0.35)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_shadow"]
+material = SubResource("StandardMaterial3D_shadow")
+top_radius = 0.6
+bottom_radius = 0.6
+height = 0.02
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ebody"]
+albedo_color = Color(0.75, 0.18, 0.2, 1)
+roughness = 0.55
+
+[sub_resource type="BoxMesh" id="BoxMesh_ebody"]
+material = SubResource("StandardMaterial3D_ebody")
+size = Vector3(0.75, 0.85, 0.45)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_armor"]
+albedo_color = Color(0.2, 0.22, 0.28, 1)
+metallic = 0.4
+roughness = 0.4
+
+[sub_resource type="BoxMesh" id="BoxMesh_pauldron"]
+material = SubResource("StandardMaterial3D_armor")
+size = Vector3(0.32, 0.28, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ehead"]
+albedo_color = Color(0.92, 0.76, 0.62, 1)
+roughness = 0.6
+
+[sub_resource type="SphereMesh" id="SphereMesh_ehead"]
+material = SubResource("StandardMaterial3D_ehead")
+radius = 0.32
+height = 0.64
+
+[sub_resource type="BoxMesh" id="BoxMesh_band"]
+material = SubResource("StandardMaterial3D_armor")
+size = Vector3(0.66, 0.14, 0.66)
+
+[sub_resource type="BoxMesh" id="BoxMesh_elimb"]
+material = SubResource("StandardMaterial3D_armor")
+size = Vector3(0.24, 0.65, 0.24)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_blade"]
+albedo_color = Color(0.85, 0.9, 0.98, 1)
+metallic = 0.8
+roughness = 0.2
+
+[sub_resource type="BoxMesh" id="BoxMesh_blade"]
+material = SubResource("StandardMaterial3D_blade")
+size = Vector3(0.08, 0.95, 0.16)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_target"]
+albedo_color = Color(1, 0.2, 0.2, 1)
+emission_enabled = true
+emission = Color(1, 0.15, 0.15, 1)
+emission_energy_multiplier = 1.6
+
+[sub_resource type="TorusMesh" id="TorusMesh_target"]
+material = SubResource("StandardMaterial3D_target")
+inner_radius = 0.55
+outer_radius = 0.72
+
+[sub_resource type="BoxMesh" id="BoxMesh_dust"]
+size = Vector3(0.15, 0.15, 0.15)
+
+[node name="Enemy" type="CharacterBody3D" groups=["enemy"]]
+collision_layer = 1
+collision_mask = 1
+script = ExtResource("1_enemy")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("CapsuleShape3D_enemy")
+
+[node name="Shadow" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
+mesh = SubResource("CylinderMesh_shadow")
+
+[node name="MeshRoot" type="Node3D" parent="."]
+
+[node name="Body" type="MeshInstance3D" parent="MeshRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.98, 0)
+mesh = SubResource("BoxMesh_ebody")
+
+[node name="PauldronL" type="MeshInstance3D" parent="MeshRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.48, 1.32, 0)
+mesh = SubResource("BoxMesh_pauldron")
+
+[node name="PauldronR" type="MeshInstance3D" parent="MeshRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.48, 1.32, 0)
+mesh = SubResource("BoxMesh_pauldron")
+
+[node name="Head" type="MeshInstance3D" parent="MeshRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.66, 0)
+mesh = SubResource("SphereMesh_ehead")
+
+[node name="Headband" type="MeshInstance3D" parent="MeshRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.74, 0)
+mesh = SubResource("BoxMesh_band")
+
+[node name="LeftArm" type="MeshInstance3D" parent="MeshRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0.95, 0)
+mesh = SubResource("BoxMesh_elimb")
+
+[node name="RightArm" type="MeshInstance3D" parent="MeshRoot"]
+transform = Transform3D(1, 0, 0, 0, 0.866025, -0.5, 0, 0.5, 0.866025, 0.5, 0.95, -0.1)
+mesh = SubResource("BoxMesh_elimb")
+
+[node name="Katana" type="MeshInstance3D" parent="MeshRoot/RightArm"]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, -0.35, -0.42)
+mesh = SubResource("BoxMesh_blade")
+
+[node name="LeftLeg" type="MeshInstance3D" parent="MeshRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 0.32, 0)
+mesh = SubResource("BoxMesh_elimb")
+
+[node name="RightLeg" type="MeshInstance3D" parent="MeshRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 0.32, 0)
+mesh = SubResource("BoxMesh_elimb")
+
+[node name="TargetIndicator" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.75, 0)
+visible = false
+mesh = SubResource("TorusMesh_target")
+
+[node name="SubViewport" type="SubViewport" parent="."]
+transparent_bg = true
+size = Vector2i(220, 50)
+render_target_update_mode = 4
+
+[node name="Panel" type="Panel" parent="SubViewport"]
+offset_right = 220.0
+offset_bottom = 50.0
+
+[node name="NameLabel" type="Label" parent="SubViewport/Panel"]
+layout_mode = 0
+offset_right = 220.0
+offset_bottom = 22.0
+theme_override_font_sizes/font_size = 14
+text = "Inimigo"
+horizontal_alignment = 1
+
+[node name="ProgressBar" type="ProgressBar" parent="SubViewport/Panel"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 24.0
+offset_right = 210.0
+offset_bottom = 44.0
+theme_override_font_sizes/font_size = 12
+show_percentage = false
+
+[node name="HpLabel" type="Label" parent="SubViewport/Panel"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 24.0
+offset_right = 210.0
+offset_bottom = 44.0
+theme_override_font_sizes/font_size = 11
+text = "100 / 100"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HealthBar3D" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.38, 0)
+billboard = 1
+
+[node name="DeathParticles" type="CPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+emitting = false
+amount = 20
+lifetime = 0.6
+one_shot = true
+explosiveness = 0.9
+mesh = SubResource("BoxMesh_dust")
+emission_shape = 1
+emission_sphere_radius = 0.8
+direction = Vector3(0, 1, 0)
+spread = 180.0
+gravity = Vector3(0, -6, 0)
+initial_velocity_min = 2.0
+initial_velocity_max = 5.0

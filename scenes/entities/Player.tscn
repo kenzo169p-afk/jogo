@@ -1,0 +1,160 @@
+[gd_scene load_steps=18 format=3 uid="uid://c4player001"]
+
+[ext_resource type="Script" path="res://scripts/entities/Player.gd" id="1_player"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
+radius = 0.45
+height = 1.8
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_shadow"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0, 0, 0, 0.35)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_shadow"]
+material = SubResource("StandardMaterial3D_shadow")
+top_radius = 0.55
+bottom_radius = 0.55
+height = 0.02
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_body"]
+albedo_color = Color(0.15, 0.45, 0.85, 1)
+roughness = 0.5
+
+[sub_resource type="BoxMesh" id="BoxMesh_torso"]
+material = SubResource("StandardMaterial3D_body")
+size = Vector3(0.62, 0.72, 0.36)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gold"]
+albedo_color = Color(0.95, 0.78, 0.15, 1)
+metallic = 0.4
+roughness = 0.3
+
+[sub_resource type="BoxMesh" id="BoxMesh_belt"]
+material = SubResource("StandardMaterial3D_gold")
+size = Vector3(0.65, 0.1, 0.39)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_scarf"]
+albedo_color = Color(0.9, 0.18, 0.22, 1)
+roughness = 0.6
+
+[sub_resource type="BoxMesh" id="BoxMesh_scarf"]
+material = SubResource("StandardMaterial3D_scarf")
+size = Vector3(0.5, 0.65, 0.08)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_head"]
+albedo_color = Color(0.98, 0.82, 0.7, 1)
+roughness = 0.6
+
+[sub_resource type="SphereMesh" id="SphereMesh_head"]
+material = SubResource("StandardMaterial3D_head")
+radius = 0.3
+height = 0.6
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hair"]
+albedo_color = Color(0.12, 0.14, 0.2, 1)
+roughness = 0.4
+
+[sub_resource type="PrismMesh" id="PrismMesh_hair"]
+material = SubResource("StandardMaterial3D_hair")
+size = Vector3(0.68, 0.38, 0.68)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_visor"]
+albedo_color = Color(0.2, 0.9, 1, 1)
+emission_enabled = true
+emission = Color(0.1, 0.8, 1, 1)
+emission_energy_multiplier = 1.5
+
+[sub_resource type="BoxMesh" id="BoxMesh_visor"]
+material = SubResource("StandardMaterial3D_visor")
+size = Vector3(0.42, 0.12, 0.12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_limb"]
+material = SubResource("StandardMaterial3D_body")
+size = Vector3(0.22, 0.58, 0.22)
+
+[node name="Player" type="CharacterBody3D" groups=["player"]]
+collision_layer = 2
+collision_mask = 1
+script = ExtResource("1_player")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_1")
+
+[node name="Shadow" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
+mesh = SubResource("CylinderMesh_shadow")
+
+[node name="MeshRoot" type="Node3D" parent="."]
+
+[node name="BodyMesh" type="MeshInstance3D" parent="MeshRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.92, 0)
+mesh = SubResource("BoxMesh_torso")
+
+[node name="BeltMesh" type="MeshInstance3D" parent="MeshRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.62, 0)
+mesh = SubResource("BoxMesh_belt")
+
+[node name="ScarfMesh" type="MeshInstance3D" parent="MeshRoot"]
+transform = Transform3D(1, 0, 0, 0, 0.965926, -0.258819, 0, 0.258819, 0.965926, 0, 0.95, 0.24)
+mesh = SubResource("BoxMesh_scarf")
+
+[node name="HeadMesh" type="MeshInstance3D" parent="MeshRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.52, 0)
+mesh = SubResource("SphereMesh_head")
+
+[node name="HairMesh" type="MeshInstance3D" parent="MeshRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.76, 0)
+mesh = SubResource("PrismMesh_hair")
+
+[node name="Visor" type="MeshInstance3D" parent="MeshRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.54, -0.26)
+mesh = SubResource("BoxMesh_visor")
+
+[node name="LeftArm" type="MeshInstance3D" parent="MeshRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.44, 0.92, 0)
+mesh = SubResource("BoxMesh_limb")
+
+[node name="RightArm" type="MeshInstance3D" parent="MeshRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.44, 0.92, 0)
+mesh = SubResource("BoxMesh_limb")
+
+[node name="LeftLeg" type="MeshInstance3D" parent="MeshRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.18, 0.3, 0)
+mesh = SubResource("BoxMesh_limb")
+
+[node name="RightLeg" type="MeshInstance3D" parent="MeshRoot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18, 0.3, 0)
+mesh = SubResource("BoxMesh_limb")
+
+[node name="CameraPivot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+
+[node name="SpringArm3D" type="SpringArm3D" parent="CameraPivot"]
+transform = Transform3D(1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 0, 0)
+spring_length = 6.5
+margin = 0.2
+
+[node name="Camera3D" type="Camera3D" parent="CameraPivot/SpringArm3D"]
+current = true
+fov = 70.0
+
+[node name="FighterContainer" type="Node3D" parent="."]
+
+[node name="SprintParticles" type="CPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+emitting = false
+amount = 16
+lifetime = 0.35
+mesh = SubResource("BoxMesh_visor")
+emission_shape = 1
+emission_sphere_radius = 0.4
+direction = Vector3(0, 1, 1)
+spread = 45.0
+gravity = Vector3(0, -4, 0)
+initial_velocity_min = 2.0
+initial_velocity_max = 4.0
+scale_amount_min = 0.3
+scale_amount_max = 0.6
+color = Color(0.5, 0.9, 1, 0.7)
