@@ -43,6 +43,7 @@ func save_game() -> bool:
 		"bosses_killed": GameManager.bosses_killed,
 		"gacha_spins": GameManager.gacha_spins,
 		"claimed_achievements": GameManager.claimed_achievements,
+		"unlocked_fighters": GameManager.unlocked_fighters,
 		"timestamp": Time.get_unix_time_from_system()
 	}
 	
@@ -120,6 +121,10 @@ func load_game() -> bool:
 		GameManager.claimed_achievements.clear()
 		for a_id in data["claimed_achievements"]:
 			GameManager.claimed_achievements.append(str(a_id))
+	if data.has("unlocked_fighters") and typeof(data["unlocked_fighters"]) == TYPE_ARRAY:
+		GameManager.unlocked_fighters.clear()
+		for fname in data["unlocked_fighters"]:
+			GameManager.unlocked_fighters.append(str(fname))
 			
 	game_loaded.emit()
 	return true

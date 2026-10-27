@@ -14,6 +14,7 @@ signal fighter_leveled_up(fighter_id: String, new_level: int)
 signal fighter_passive_changed(fighter_id: String, new_passive_id: String)
 signal open_passive_ui_requested(island_id: int)
 signal open_achievements_ui_requested()
+signal open_index_ui_requested()
 signal achievements_changed()
 
 const MAX_EQUIPPED_FIGHTERS = 3
@@ -31,6 +32,7 @@ var coins_collected: float = 0.0
 var bosses_killed: int = 0
 var gacha_spins: int = 0
 var claimed_achievements: Array = []
+var unlocked_fighters: Array = []
 var _notified_achievements: Dictionary = {}
 
 var current_target: Node = null
@@ -102,6 +104,9 @@ func generate_uuid() -> String:
 func _recalc_all_fighters_stats() -> void:
 	var dmg_mult = get_damage_multiplier()
 	for f in inventory:
+		var fname = str(f.get("name", ""))
+		if fname != "" and not unlocked_fighters.has(fname):
+			unlocked_fighters.append(fname)
 		var base = float(f.get("base_dps", f.get("dps", 25.0)))
 		f["base_dps"] = base
 		if not f.has("level"):
@@ -293,6 +298,9 @@ func add_fighter_to_inventory(fighter_data: Dictionary) -> String:
 		
 	fighter_data["dps"] = IslandData.calculate_fighter_dps(fighter_data["base_dps"], fighter_data["level"], fighter_data["passive_id"])
 	
+	var fname = str(fighter_data.get("name", ""))
+	if fname != "" and not unlocked_fighters.has(fname):
+		unlocked_fighters.append(fname)
 	inventory.append(fighter_data)
 	inventory_changed.emit()
 	
@@ -488,3 +496,67 @@ func claim_achievement(ach_id: String) -> bool:
 
 func request_open_achievements_ui() -> void:
 	open_achievements_ui_requested.emit()
+
+func request_open_index_ui() -> void:
+	open_index_ui_requested.emit()
+
+# --- CHARACTER INDEX (COLLECTION) API ---
+func is_fighter_discovered(fighter_name: String) -> bool:
+	if unlocked_fighters.has(fighter_name):
+		return true
+	for f in inventory:
+		if f.get("name", "") == fighter_name:
+			return true
+	return false
+
+func get_island_index_stats(island_id: int) -> Dictionary:
+	var isl = IslandData.get_island(island_id)
+	var pool: Dictionary = isl.get("fighters", {})
+	var rarities = [
+		IslandData.RARITY_COMMON,
+		IslandData.RARITY_RARE,
+		IslandData.RARITY_EPIC,
+		IslandData.RARITY_LEGENDARY,
+		IslandData.RARITY_MYTHIC
+	]
+	var owned: int = 0
+	var total: int = 0
+	for rar in rarities:
+		if pool.has(rar):
+			total += 1
+			var fname = pool[rar].get("name", "")
+			if is_fighter_discovered(fname):
+				owned += 1
+	if total == 0:
+		total = 5
+	var pct_owned: int = int(round((float(owned) / float(total)) * 100.0))
+	var pct_missing: int = 100 - pct_owned
+	return {
+		"owned": owned,
+		"total": total,
+		"missing_count": total - owned,
+		"pct_owned": pct_owned,
+		"pct_missing": pct_missing,
+		"is_complete": (owned == total)
+	}
+
+func get_global_index_stats() -> Dictionary:
+	var total_owned: int = 0
+	var total_fighters: int = 0
+	var completed_islands: int = 0
+	for i in range(1, 11):
+		var st = get_island_index_stats(i)
+		total_owned += int(st["owned"])
+		total_fighters += int(st["total"])
+		if st["is_complete"]:
+			completed_islands += 1
+	var pct_owned: int = int(round((float(total_owned) / float(maxi(1, total_fighters))) * 100.0))
+	var pct_missing: int = 100 - pct_owned
+	return {
+		"total_owned": total_owned,
+		"total_fighters": total_fighters,
+		"total_missing": total_fighters - total_owned,
+		"pct_owned": pct_owned,
+		"pct_missing": pct_missing,
+		"completed_islands": completed_islands
+	}

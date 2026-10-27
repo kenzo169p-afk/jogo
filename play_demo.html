@@ -64,6 +64,65 @@
             color: #e070ff;
             font-weight: 600;
         }
+        #index-hud-text {
+            font-size: 12px;
+            color: #00d2d3;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 2px 10px;
+            border-radius: 6px;
+            background: rgba(0, 210, 211, 0.12);
+            border: 1px solid rgba(0, 210, 211, 0.35);
+            transition: all 0.15s ease;
+        }
+        #index-hud-text:hover {
+            background: rgba(0, 210, 211, 0.24);
+            border-color: #00d2d3;
+        }
+        .index-island-block {
+            background: linear-gradient(90deg, rgba(22, 30, 44, 0.95) 0%, rgba(16, 22, 32, 0.95) 100%);
+            border: 1px solid #2d3b52;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+        }
+        .index-island-block.complete {
+            border-color: #2ecc71;
+            box-shadow: 0 0 12px rgba(46, 204, 113, 0.2);
+        }
+        .index-island-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .index-fighters-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .index-fighter-slot {
+            background: #131a26;
+            border: 1.5px solid #2c384c;
+            border-radius: 8px;
+            padding: 8px 6px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.15s ease;
+        }
+        .index-fighter-slot.owned {
+            background: linear-gradient(180deg, rgba(28, 40, 58, 0.95) 0%, rgba(18, 26, 38, 0.95) 100%);
+        }
+        .index-fighter-slot.missing {
+            opacity: 0.48;
+            filter: grayscale(0.6);
+        }
 
         /* TARGET PANEL */
         #target-panel {
@@ -633,6 +692,7 @@
         <div id="island-title">Ilha 1: Vila da Folha (Naruto)</div>
         <div id="currency-text">Moedas: 100</div>
         <div id="team-dps-text">DPS da Equipe: 25 (1/3)</div>
+        <div id="index-hud-text" title="Clique para abrir o Índice de Personagens [X]">📖 Índice Geral: 2% (1/50) | Falta: 98% • Ilha Atual: 20% (Falta 80%)</div>
     </div>
 
     <!-- TARGET MOB BAR -->
@@ -654,6 +714,7 @@
     <div id="bottom-bar">
         <button class="btn" id="btn-inventory">Inventário [I]</button>
         <button class="btn" id="btn-islands">Ilhas [M]</button>
+        <button class="btn" id="btn-index" style="border-color:#00d2d3; color:#00d2d3;">Índice [X]</button>
         <button class="btn btn-yellow" id="btn-passives">Passivas [P]</button>
         <button class="btn" id="btn-achievements" style="border-color:#f39c12; color:#f39c12;">Conquistas [C]</button>
         <button class="btn btn-green" id="btn-equip-best">Equipar Melhores</button>
@@ -671,7 +732,7 @@
         <b>[WASD]</b> Mover &nbsp;|&nbsp; <b>[SHIFT]</b> Sprint Corrida<br>
         <b>[Espaço]</b> Pular &nbsp;|&nbsp; <b>[Botão Direito]</b> Girar Câmera<br>
         <b>[Clique Esquerdo]</b> Focar Inimigo &nbsp;|&nbsp; <b>[E]</b> Interagir<br>
-        <b>[C]</b> Conquistas &nbsp;|&nbsp; <b>[I]</b> Inventário &nbsp;|&nbsp; <b>[P]</b> Passivas
+        <b>[X]</b> Índice &nbsp;|&nbsp; <b>[C]</b> Conquistas &nbsp;|&nbsp; <b>[I]</b> Inventário &nbsp;|&nbsp; <b>[P]</b> Passivas
     </div>
 
     <!-- INVENTORY MODAL -->
@@ -695,7 +756,28 @@
             <div class="modal-title">MAPA DAS 10 ILHAS DE ANIME</div>
             <button class="modal-close" id="modal-close-islands">&times;</button>
         </div>
+        <div id="islands-modal-index-summary" style="background:rgba(14,20,30,0.9); border:1.5px solid #00d2d3; border-radius:8px; padding:8px 14px; margin-bottom:10px; font-size:13px; display:flex; justify-content:space-between; align-items:center;"></div>
         <div class="modal-content" id="island-rows-container"></div>
+    </div>
+
+    <!-- CHARACTER INDEX MODAL (ALL ISLANDS TOGETHER + % MISSING) -->
+    <div class="modal" id="modal-index">
+        <div class="modal-header">
+            <div class="modal-title" style="color:#00d2d3;">📖 ÍNDICE DE PERSONAGENS (TODAS AS 10 ILHAS)</div>
+            <button class="modal-close" id="modal-close-index">&times;</button>
+        </div>
+        <div class="ach-summary-bar" id="index-global-summary-bar">
+            <div class="ach-bonus-badge" style="color:#00d2d3; border-color:#00d2d3;">
+                <span>📖 Obtidos (Todas as Ilhas):</span> <b id="idx-total-obtained">1 / 50 (2%)</b>
+            </div>
+            <div class="ach-bonus-badge" style="color:#ff6b81; border-color:#ff4757;">
+                <span>⏳ Porcentagem que Falta:</span> <b id="idx-total-missing">98% (Faltam 49)</b>
+            </div>
+            <div class="ach-bonus-badge" style="color:#2ecc71; border-color:#27ae60;">
+                <span>🏝️ Ilhas 100% Completas:</span> <b id="idx-islands-completed">0 / 10</b>
+            </div>
+        </div>
+        <div class="modal-content" id="index-islands-container"></div>
     </div>
 
     <!-- ACHIEVEMENTS MODAL -->
@@ -1104,9 +1186,133 @@
             coins_collected: 0,
             enemies_killed: 0,
             gacha_spins: 0,
-            claimed_achievements: []
+            claimed_achievements: [],
+            unlocked_fighters: ["Clone de Naruto"]
         };
 
+
+        /* --- CHARACTER INDEX (COLLECTION) API & UI --- */
+        const RARITY_ORDER = [RARITY_COMMON, RARITY_RARE, RARITY_EPIC, RARITY_LEGENDARY, RARITY_MYTHIC];
+
+        function isFighterDiscovered(fighterName) {
+            if (Array.isArray(state.unlocked_fighters) && state.unlocked_fighters.includes(fighterName)) {
+                return true;
+            }
+            return state.inventory.some(f => f.name === fighterName);
+        }
+
+        function markFighterDiscovered(fighterName) {
+            if (!Array.isArray(state.unlocked_fighters)) state.unlocked_fighters = [];
+            if (fighterName && !state.unlocked_fighters.includes(fighterName)) {
+                state.unlocked_fighters.push(fighterName);
+            }
+        }
+
+        function getIslandIndexStats(islandId) {
+            const isl = ISLANDS[islandId];
+            if (!isl || !isl.fighters) return { owned: 0, total: 5, pctOwned: 0, pctMissing: 100, isComplete: false, details: [] };
+            let owned = 0;
+            const details = [];
+            RARITY_ORDER.forEach(rar => {
+                const f = isl.fighters[rar];
+                if (f) {
+                    const has = isFighterDiscovered(f.name);
+                    if (has) owned++;
+                    details.push({ rarity: rar, name: f.name, dps: f.dps, color: f.color, owned: has });
+                }
+            });
+            const total = details.length || 5;
+            const pctOwned = Math.round((owned / total) * 100);
+            const pctMissing = 100 - pctOwned;
+            return {
+                owned,
+                total,
+                missingCount: total - owned,
+                pctOwned,
+                pctMissing,
+                isComplete: owned === total,
+                details
+            };
+        }
+
+        function getGlobalIndexStats() {
+            let totalOwned = 0;
+            let totalFighters = 0;
+            let completedIslands = 0;
+            for (let i = 1; i <= 10; i++) {
+                const st = getIslandIndexStats(i);
+                totalOwned += st.owned;
+                totalFighters += st.total;
+                if (st.isComplete) completedIslands++;
+            }
+            const pctOwned = totalFighters > 0 ? Math.round((totalOwned / totalFighters) * 100) : 0;
+            const pctMissing = 100 - pctOwned;
+            return {
+                totalOwned,
+                totalFighters,
+                totalMissing: totalFighters - totalOwned,
+                pctOwned,
+                pctMissing,
+                completedIslands
+            };
+        }
+
+        function renderIndexModal() {
+            const globalSt = getGlobalIndexStats();
+            const obtEl = document.getElementById('idx-total-obtained');
+            const misEl = document.getElementById('idx-total-missing');
+            const cmpEl = document.getElementById('idx-islands-completed');
+            if (obtEl) obtEl.innerText = `${globalSt.totalOwned} / ${globalSt.totalFighters} (${globalSt.pctOwned}%)`;
+            if (misEl) misEl.innerText = globalSt.pctMissing === 0 ? `0% (COMPLETO! 🎉)` : `${globalSt.pctMissing}% (Faltam ${globalSt.totalMissing})`;
+            if (cmpEl) cmpEl.innerText = `${globalSt.completedIslands} / 10`;
+
+            const container = document.getElementById('index-islands-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            for (let i = 1; i <= 10; i++) {
+                const isl = ISLANDS[i];
+                const st = getIslandIndexStats(i);
+
+                const block = document.createElement('div');
+                block.className = 'index-island-block' + (st.isComplete ? ' complete' : '');
+
+                const statusBadge = st.isComplete
+                    ? `<span style="color:#2ecc71; font-weight:800; font-size:13px;">✅ COMPLETO (5/5 • Falta 0%)</span>`
+                    : `<span style="color:#ffd32a; font-weight:700; font-size:13px;">Obtidos: ${st.owned}/${st.total} (${st.pctOwned}%) &nbsp;|&nbsp; <b style="color:#ff6b81;">Falta: ${st.pctMissing}% (${st.missingCount})</b></span>`;
+
+                let slotsHtml = '';
+                st.details.forEach(item => {
+                    const rColor = RARITY_COLORS[item.rarity] || '#bdc3c7';
+                    slotsHtml += `
+                        <div class="index-fighter-slot ${item.owned ? 'owned' : 'missing'}" style="border-color:${item.owned ? rColor : '#2c384c'};">
+                            <div style="font-size:10px; font-weight:800; color:${rColor}; text-transform:uppercase;">${item.rarity}</div>
+                            <div style="font-size:12px; font-weight:700; color:${item.owned ? '#fff' : '#7f8c8d'}; min-height:30px; display:flex; align-items:center; justify-content:center;">
+                                ${item.name}
+                            </div>
+                            <div style="font-size:11px; color:#f39c12;">DPS: ${formatNum(item.dps)}</div>
+                            <div style="font-size:11px; font-weight:800; color:${item.owned ? '#2ecc71' : '#e74c3c'};">
+                                ${item.owned ? '✓ Obtido' : '✗ Falta'}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                block.innerHTML = `
+                    <div class="index-island-header">
+                        <div style="font-size:15px; font-weight:800; color:#ecf0f1;">
+                            Ilha ${isl.id}: ${isl.name}
+                        </div>
+                        <div>${statusBadge}</div>
+                    </div>
+                    <div class="ach-progress-outer" style="height:8px; margin-bottom:6px;">
+                        <div class="ach-progress-inner" style="width:${st.pctOwned}%;"></div>
+                    </div>
+                    <div class="index-fighters-row">${slotsHtml}</div>
+                `;
+                container.appendChild(block);
+            }
+        }
 
         /* --- ACHIEVEMENTS SYSTEM API & CALCULATIONS --- */
         let currentAchFilter = 'all';
@@ -1287,6 +1493,12 @@
                         if (state.enemies_killed === undefined) state.enemies_killed = 0;
                         if (state.gacha_spins === undefined) state.gacha_spins = 0;
                         if (!state.claimed_achievements) state.claimed_achievements = [];
+                        if (!Array.isArray(state.unlocked_fighters)) state.unlocked_fighters = [];
+                        state.inventory.forEach(f => {
+                            if (f && f.name && !state.unlocked_fighters.includes(f.name)) {
+                                state.unlocked_fighters.push(f.name);
+                            }
+                        });
                     }
                 }
             } catch(e) {}
@@ -2396,6 +2608,7 @@
             if (e.code === 'KeyM') toggleModal('modal-islands');
             if (e.code === 'KeyP') toggleModal('modal-passive');
             if (e.code === 'KeyC') toggleModal('modal-achievements');
+            if (e.code === 'KeyX') toggleModal('modal-index');
             if (e.code === 'KeyE') handleInteract();
             if (e.code === 'Escape' || e.code === 'KeyQ') clearTarget();
             if (e.code === 'Space' && isGrounded) {
@@ -2999,6 +3212,7 @@
             };
 
             state.inventory.push(newFighter);
+            markFighterDiscovered(newFighter.name);
             playSound('gacha');
             showNotification(`Obteve: [${rarity}] ${newFighter.name} (${formatNum(newFighter.dps)} DPS)!`, RARITY_COLORS[rarity]);
 
@@ -3161,6 +3375,14 @@
             const totalDps = equipped.reduce((sum, f) => sum + f.dps, 0);
             document.getElementById('team-dps-text').innerText = `DPS da Equipe: ${formatNum(totalDps)} (${equipped.length}/3)`;
             document.getElementById('inv-equipped-count').innerText = `Equipados: ${equipped.length} / 3`;
+
+            const hudIdx = document.getElementById('index-hud-text');
+            if (hudIdx) {
+                const gSt = getGlobalIndexStats();
+                const cSt = getIslandIndexStats(isl.id);
+                const curStatus = cSt.isComplete ? 'COMPLETO (0% falta)' : `${cSt.owned}/${cSt.total} (Falta ${cSt.pctMissing}%)`;
+                hudIdx.innerText = `📖 Índice (Todas as Ilhas): ${gSt.totalOwned}/${gSt.totalFighters} (${gSt.pctOwned}% • Falta ${gSt.pctMissing}%) | Ilha ${isl.id}: ${curStatus}`;
+            }
         }
 
         let notifyTimeout = null;
@@ -3183,6 +3405,8 @@
             document.getElementById('modal-passive').style.display = 'none';
             const achModal = document.getElementById('modal-achievements');
             if (achModal) achModal.style.display = 'none';
+            const idxModal = document.getElementById('modal-index');
+            if (idxModal) idxModal.style.display = 'none';
 
             if (!isVisible) {
                 modal.style.display = 'flex';
@@ -3190,6 +3414,7 @@
                 if (id === 'modal-islands') renderIslandsList();
                 if (id === 'modal-passive') renderPassiveModal();
                 if (id === 'modal-achievements') renderAchievementsModal();
+                if (id === 'modal-index') renderIndexModal();
             }
         }
 
@@ -3254,10 +3479,25 @@
             const container = document.getElementById('island-rows-container');
             container.innerHTML = '';
 
+            const summaryBox = document.getElementById('islands-modal-index-summary');
+            if (summaryBox) {
+                const gSt = getGlobalIndexStats();
+                summaryBox.innerHTML = `
+                    <div>
+                        <b style="color:#00d2d3;">📖 Índice de Todas as Ilhas Juntas:</b>
+                        <span style="color:#fff; font-weight:700;"> ${gSt.totalOwned}/${gSt.totalFighters} Personagens (${gSt.pctOwned}%)</span>
+                        &nbsp;|&nbsp;
+                        <b style="color:#ff6b81;">Falta no Total: ${gSt.pctMissing}% (${gSt.totalMissing} personagens)</b>
+                    </div>
+                    <button class="btn" style="padding:5px 12px; font-size:12px; border-color:#00d2d3; color:#00d2d3;" onclick="toggleModal('modal-index')">Ver Índice Completo [X]</button>
+                `;
+            }
+
             for (let i = 1; i <= 10; i++) {
                 const isl = ISLANDS[i];
                 const isUnlocked = state.unlocked_islands.includes(i);
                 const isCurrent = state.current_island === i;
+                const idxSt = getIslandIndexStats(i);
 
                 const row = document.createElement('div');
                 row.className = 'island-row';
@@ -3271,10 +3511,15 @@
                     actionHtml = `<button class="btn" style="padding:6px 14px; border-color:#f1c40f; color:#f1c40f;" onclick="unlockFromMenu(${i})">Desbloquear (${formatNum(isl.unlock_cost)})</button>`;
                 }
 
+                const idxBadge = idxSt.isComplete
+                    ? `<span style="color:#2ecc71; font-weight:bold;">✅ Índice: Completo (5/5 • Falta 0%)</span>`
+                    : `<span style="color:#00d2d3; font-weight:bold;">📖 Índice: ${idxSt.owned}/${idxSt.total} (${idxSt.pctOwned}%)</span> • <span style="color:#ff6b81; font-weight:bold;">Falta: ${idxSt.pctMissing}%</span>`;
+
                 row.innerHTML = `
                     <div class="island-info">
                         <h4>Ilha ${isl.id}: ${isl.name}</h4>
                         <p>Moeda: ${isl.currency_name} | Mob: +${formatNum(isl.mob_drop)} | Chefe: +${formatNum(isl.boss_drop)}</p>
+                        <p style="margin-top:3px;">${idxBadge}</p>
                     </div>
                     <div>${actionHtml}</div>
                 `;
@@ -3303,6 +3548,10 @@
         document.getElementById('btn-passives').onclick = () => openPassiveModal(state.current_island);
         const btnAch = document.getElementById('btn-achievements');
         if (btnAch) btnAch.onclick = () => toggleModal('modal-achievements');
+        const btnIdx = document.getElementById('btn-index');
+        if (btnIdx) btnIdx.onclick = () => toggleModal('modal-index');
+        const hudIdxEl = document.getElementById('index-hud-text');
+        if (hudIdxEl) hudIdxEl.onclick = () => toggleModal('modal-index');
         document.getElementById('btn-equip-best').onclick = equipBest;
         document.getElementById('modal-btn-equip-best').onclick = equipBest;
         document.getElementById('btn-save').onclick = saveGame;
@@ -3313,6 +3562,8 @@
         document.getElementById('modal-close-passive').onclick = () => toggleModal('modal-passive');
         const closeAch = document.getElementById('modal-close-achievements');
         if (closeAch) closeAch.onclick = () => toggleModal('modal-achievements');
+        const closeIdx = document.getElementById('modal-close-index');
+        if (closeIdx) closeIdx.onclick = () => toggleModal('modal-index');
 
         // Achievements category tab click listeners
         document.querySelectorAll('.ach-tab-btn').forEach(btn => {

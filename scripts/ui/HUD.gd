@@ -6,6 +6,7 @@ extends CanvasLayer
 @onready var island_name_label: Label = $TopBar/IslandContainer/IslandNameLabel
 @onready var currency_label: Label = $TopBar/IslandContainer/CurrencyLabel
 @onready var total_dps_label: Label = $TopBar/IslandContainer/TotalDpsLabel
+@onready var index_label: Label = $TopBar/IslandContainer.get_node_or_null("IndexLabel")
 
 @onready var target_panel: PanelContainer = $TargetPanel
 @onready var target_name_label: Label = $TargetPanel/VBox/TargetNameLabel
@@ -15,6 +16,7 @@ extends CanvasLayer
 @onready var notify_label: Label = $NotifyLabel
 @onready var btn_inventory: Button = $ActionButtons/BtnInventory
 @onready var btn_islands: Button = $ActionButtons/BtnIslands
+@onready var btn_index: Button = $ActionButtons.get_node_or_null("BtnIndex")
 @onready var btn_passives: Button = $ActionButtons.get_node_or_null("BtnPassives")
 @onready var btn_achievements: Button = $ActionButtons.get_node_or_null("BtnAchievements")
 @onready var btn_equip_best: Button = $ActionButtons/BtnEquipBest
@@ -23,6 +25,7 @@ extends CanvasLayer
 @export var inventory_ui: Control
 @export var island_menu_ui: Control
 @export var achievements_ui: Control
+@export var index_ui: Control
 
 var current_target_node: Node = null
 var notify_tween: Tween
@@ -32,11 +35,14 @@ func _ready() -> void:
 	GameManager.island_changed.connect(_on_island_changed)
 	GameManager.target_changed.connect(_on_target_changed)
 	GameManager.equipped_changed.connect(_update_total_dps)
+	GameManager.inventory_changed.connect(_update_index_info)
 	GameManager.system_message.connect(show_notification)
 	SaveManager.game_saved.connect(_on_game_saved)
 	
 	btn_inventory.pressed.connect(_on_inventory_pressed)
 	btn_islands.pressed.connect(_on_islands_pressed)
+	if btn_index:
+		btn_index.pressed.connect(_on_index_pressed)
 	if btn_passives:
 		btn_passives.pressed.connect(_on_passives_pressed)
 	if btn_achievements:
@@ -72,12 +78,25 @@ func _unhandled_input(event: InputEvent) -> void:
 			_on_passives_pressed()
 		elif event.keycode == KEY_C:
 			_on_achievements_pressed()
+		elif event.keycode == KEY_X:
+			_on_index_pressed()
 
 func _update_island_info() -> void:
 	var island = IslandData.get_island(GameManager.current_island)
 	island_name_label.text = "Ilha %d: %s" % [island["id"], island["name"]]
 	var amt = GameManager.get_currency(IslandData.CURRENCY_ID)
 	currency_label.text = "%s: %s" % [IslandData.CURRENCY_NAME, IslandData.format_number(amt)]
+	_update_index_info()
+
+func _update_index_info() -> void:
+	if not index_label:
+		return
+	var g_st = GameManager.get_global_index_stats()
+	var c_st = GameManager.get_island_index_stats(GameManager.current_island)
+	var cur_txt = "COMPLETO (0%% falta)" if c_st["is_complete"] else "%d/%d (Falta %d%%)" % [c_st["owned"], c_st["total"], c_st["pct_missing"]]
+	index_label.text = "📖 Índice (Todas as Ilhas): %d/%d (%d%% • Falta %d%%) | Ilha %d: %s" % [
+		g_st["total_owned"], g_st["total_fighters"], g_st["pct_owned"], g_st["pct_missing"], GameManager.current_island, cur_txt
+	]
 
 func _on_currency_changed(currency_id: String, _new_amt: float) -> void:
 	if currency_id == IslandData.CURRENCY_ID:
@@ -147,6 +166,19 @@ func _on_achievements_pressed() -> void:
 		if achievements_ui.visible:
 			if inventory_ui: inventory_ui.visible = false
 			if island_menu_ui: island_menu_ui.visible = false
+			if index_ui: index_ui.visible = false
+			var p_ui = get_node_or_null("../PassiveUI")
+			if p_ui: p_ui.visible = false
+
+func _on_index_pressed() -> void:
+	if index_ui:
+		index_ui.visible = not index_ui.visible
+		if index_ui.visible:
+			if index_ui.has_method("refresh_ui"):
+				index_ui.refresh_ui()
+			if inventory_ui: inventory_ui.visible = false
+			if island_menu_ui: island_menu_ui.visible = false
+			if achievements_ui: achievements_ui.visible = false
 			var p_ui = get_node_or_null("../PassiveUI")
 			if p_ui: p_ui.visible = false
 			if achievements_ui.has_method("refresh_ui"):

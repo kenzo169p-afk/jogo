@@ -8,6 +8,7 @@ extends Control
 func _ready() -> void:
 	GameManager.island_unlocked.connect(refresh_islands)
 	GameManager.island_changed.connect(refresh_islands)
+	GameManager.inventory_changed.connect(refresh_islands)
 	btn_close.pressed.connect(func(): visible = false)
 	visible = false
 	refresh_islands()
@@ -18,6 +19,35 @@ func refresh_islands() -> void:
 		
 	for child in island_list_container.get_children():
 		child.queue_free()
+		
+	# Global Index Summary Row (All 10 Islands Together)
+	var g_st = GameManager.get_global_index_stats()
+	var sum_row = PanelContainer.new()
+	var sum_style = StyleBoxFlat.new()
+	sum_style.bg_color = Color(0.09, 0.14, 0.2, 0.95)
+	sum_style.border_color = Color(0.0, 0.82, 0.85)
+	sum_style.set_border_width_all(1)
+	sum_style.set_corner_radius_all(6)
+	sum_row.add_theme_stylebox_override("panel", sum_style)
+	var sum_hbox = HBoxContainer.new()
+	sum_hbox.add_theme_constant_override("separation", 10)
+	sum_row.add_child(sum_hbox)
+	var sum_lbl = Label.new()
+	sum_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sum_lbl.text = "📖 Índice (Todas as Ilhas Juntas): %d/%d (%d%%) | Falta: %d%% (%d personagens)" % [
+		g_st["total_owned"], g_st["total_fighters"], g_st["pct_owned"], g_st["pct_missing"], g_st["total_missing"]
+	]
+	sum_lbl.add_theme_font_size_override("font_size", 13)
+	sum_lbl.modulate = Color(0.2, 0.95, 1.0)
+	sum_hbox.add_child(sum_lbl)
+	var btn_open_idx = Button.new()
+	btn_open_idx.text = "Ver Índice Completo [X]"
+	btn_open_idx.pressed.connect(func():
+		visible = false
+		GameManager.request_open_index_ui()
+	)
+	sum_hbox.add_child(btn_open_idx)
+	island_list_container.add_child(sum_row)
 		
 	for id_val in range(1, 11):
 		var island_data = IslandData.get_island(id_val)
@@ -51,6 +81,19 @@ func refresh_islands() -> void:
 		sub_lbl.modulate = Color(0.7, 0.7, 0.7)
 		sub_lbl.add_theme_font_size_override("font_size", 12)
 		info_vbox.add_child(sub_lbl)
+		
+		var idx_st = GameManager.get_island_index_stats(id_val)
+		var idx_lbl = Label.new()
+		if idx_st["is_complete"]:
+			idx_lbl.text = "✅ Índice: Completo (5/5 • Falta 0%)"
+			idx_lbl.modulate = Color(0.3, 1.0, 0.5)
+		else:
+			idx_lbl.text = "📖 Índice: %d/%d (%d%%) • Falta: %d%%" % [
+				idx_st["owned"], idx_st["total"], idx_st["pct_owned"], idx_st["pct_missing"]
+			]
+			idx_lbl.modulate = Color(0.2, 0.9, 1.0)
+		idx_lbl.add_theme_font_size_override("font_size", 12)
+		info_vbox.add_child(idx_lbl)
 		
 		hbox.add_child(info_vbox)
 		
