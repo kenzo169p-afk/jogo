@@ -17,6 +17,7 @@ Projeto completo desenvolvido em **Godot Engine 4.x** (GDScript) com renderizado
 | **Desselecionar Alvo** | `ESC`, `Q` ou clicar no mesmo alvo | Libera o foco dos lutadores |
 | **Interagir (Cápsulas / Máquinas / Portais)** | Tecla `E` | Abre a cápsula de gacha, máquina de passivas ou entra no portal |
 | **Inventário de Lutadores** | Tecla `I` ou botão HUD | Abre e fecha o painel de inventário (Nível, XP, Passiva, DPS) |
+| **Conquistas & Bônus** | Tecla `C` ou botão HUD | Abre e fecha o menu de Conquistas e resgate de bônus |
 | **Máquina de Passivas** | Tecla `P` ou botão HUD | Rola novas passivas para seus lutadores usando moedas da ilha |
 | **Menu das 10 Ilhas** | Tecla `M` ou botão HUD | Visualiza e teleporta entre ilhas desbloqueadas |
 | **Equipar Melhores** | Botão HUD / Inventário | Equipa automaticamente os 3 maiores DPS |
@@ -110,6 +111,25 @@ Projeto completo desenvolvido em **Godot Engine 4.x** (GDScript) com renderizado
         ├── PassiveUI.gd
         └── IslandMenuUI.gd
 ```
+
+---
+
+## 🏆 Sistema de Conquistas (Aba Dedicada [C])
+
+O jogo conta com uma aba completa de Conquistas persistentes com 4 categorias específicas, bônus progressivos acumuláveis e resgate manual interativo:
+
+1. **⏳ Tempo Jogado:**
+   - **Marcos:** 1h, 2h, 5h, 10h, 24h, 48h, 72h e 100 horas.
+   - **Recompensa:** +0,25% de sorte nos giros de personagens da ilha apenas (por marco resgatado, totalizando até +2,00%).
+2. **🪙 Dinheiro Coletado:**
+   - **Marcos:** 10, 100, 1.000, 100.000, 10.000.000 e 100.000.000.000.000 (100 trilhões) moedas coletadas.
+   - **Recompensa:** +0,25% de moeda a mais por inimigo/chefe derrotado (por marco resgatado, totalizando até +1,50%).
+3. **⚔️ Inimigos Derrotados (Comum ou Chefe):**
+   - **Marcos:** 1, 10, 50, 100, 200, 500, 1.000 e 2.000 inimigos derrotados.
+   - **Recompensa:** +0,25% de dano em qualquer inimigo (por marco resgatado, totalizando até +2,00%).
+4. **🎰 Giros de Personagem:**
+   - **Marcos:** 10, 100, 1.000, 5.000 e 10.000 giros na cápsula da ilha.
+   - **Recompensa:** +0,25% de sorte nos giros de personagens da ilha apenas (por marco resgatado, totalizando até +1,25%).
 
 ---
 

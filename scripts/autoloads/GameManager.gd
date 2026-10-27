@@ -13,6 +13,8 @@ signal system_message(text: String, color: Color)
 signal fighter_leveled_up(fighter_id: String, new_level: int)
 signal fighter_passive_changed(fighter_id: String, new_passive_id: String)
 signal open_passive_ui_requested(island_id: int)
+signal open_achievements_ui_requested()
+signal achievements_changed()
 
 const MAX_EQUIPPED_FIGHTERS = 3
 
@@ -21,6 +23,15 @@ var unlocked_islands: Array = [1]
 var current_island: int = 1
 var inventory: Array = []
 var equipped_fighter_ids: Array = []
+
+# Statistics & Lifetime Achievements Tracking
+var time_played: float = 0.0
+var enemies_killed: int = 0
+var coins_collected: float = 0.0
+var bosses_killed: int = 0
+var gacha_spins: int = 0
+var claimed_achievements: Array = []
+var _notified_achievements: Dictionary = {}
 
 var current_target: Node = null
 var player_ref: Node = null
@@ -31,6 +42,19 @@ func _ready() -> void:
 		_init_starter_pack()
 	migrate_legacy_currencies()
 	_recalc_all_fighters_stats()
+
+func _process(delta: float) -> void:
+	time_played += delta
+	_check_achievement_milestones()
+
+func _check_achievement_milestones() -> void:
+	# Periodically check if any achievement has been fulfilled and notify player once
+	for ach in IslandData.ACHIEVEMENTS:
+		var aid = ach["id"]
+		if not claimed_achievements.has(aid) and not _notified_achievements.has(aid):
+			if get_stat_for_category(ach["category"]) >= ach["target"]:
+				_notified_achievements[aid] = true
+				system_message.emit("🏆 CONQUISTA PRONTA: %s! [C] para resgatar." % ach["title"], Color(1.0, 0.9, 0.2))
 
 func _init_currencies() -> void:
 	if not currencies.has(IslandData.CURRENCY_ID):
@@ -73,6 +97,7 @@ func generate_uuid() -> String:
 	return "f_%x_%x" % [Time.get_ticks_usec(), randi()]
 
 func _recalc_all_fighters_stats() -> void:
+	var dmg_mult = get_damage_multiplier()
 	for f in inventory:
 		var base = float(f.get("base_dps", f.get("dps", 25.0)))
 		f["base_dps"] = base
@@ -84,7 +109,9 @@ func _recalc_all_fighters_stats() -> void:
 			f["passive_id"] = "none"
 		if not f.has("uid"):
 			f["uid"] = f.get("id", generate_uuid())
-		f["dps"] = IslandData.calculate_fighter_dps(base, f["level"], f["passive_id"])
+		f["dps"] = IslandData.calculate_fighter_dps(base, f["level"], f["passive_id"]) * dmg_mult
+	inventory_changed.emit()
+	equipped_changed.emit()
 
 # --- CURRENCY API ---
 func get_currency(currency_id: String) -> float:
@@ -115,8 +142,15 @@ func grant_kill_rewards(currency_id: String, base_coins: float, base_xp: float, 
 			var p_info = IslandData.get_passive_info(f.get("passive_id", "none"))
 			coin_mult += float(p_info.get("coin_bonus", 0.0))
 			
-	var final_coins = base_coins * coin_mult
+	# Apply achievements coin bonus multiplier (+25% per coin achievement claimed)
+	var final_coins = base_coins * coin_mult * get_coin_multiplier()
 	add_currency(currency_id, final_coins)
+	coins_collected += final_coins
+	
+	# 3ª Conquista: Inimigo morto (chefe ou inimigo comum) conta para enemies_killed
+	enemies_killed += 1
+	if is_boss:
+		bosses_killed += 1
 	
 	var data = IslandData.get_island(current_island)
 	var curr_name = data.get("currency_name", "Moedas")
@@ -125,7 +159,7 @@ func grant_kill_rewards(currency_id: String, base_coins: float, base_xp: float, 
 	else:
 		system_message.emit("+%s %s (+%s XP)" % [IslandData.format_number(final_coins), curr_name, IslandData.format_number(base_xp)], Color(0.9, 0.9, 0.3))
 		
-	# Distribute XP to equipped fighters
+	# Distribute XP to equipped fighters (with XP achievement multiplier)
 	add_xp_to_equipped_fighters(base_xp)
 
 func add_xp_to_equipped_fighters(base_xp_amount: float) -> void:
@@ -133,6 +167,7 @@ func add_xp_to_equipped_fighters(base_xp_amount: float) -> void:
 		return
 		
 	var any_leveled_up: bool = false
+	var xp_mult = get_xp_multiplier()
 	
 	for fid in equipped_fighter_ids:
 		var f = get_fighter_by_id(fid)
@@ -145,7 +180,7 @@ func add_xp_to_equipped_fighters(base_xp_amount: float) -> void:
 			
 		var p_info = IslandData.get_passive_info(f.get("passive_id", "none"))
 		var xp_bonus: float = float(p_info.get("xp_bonus", 0.0))
-		var gained_xp: int = int(base_xp_amount * (1.0 + xp_bonus))
+		var gained_xp: int = int(base_xp_amount * (1.0 + xp_bonus) * xp_mult)
 		
 		f["xp"] = int(f.get("xp", 0)) + gained_xp
 		
@@ -156,7 +191,7 @@ func add_xp_to_equipped_fighters(base_xp_amount: float) -> void:
 				f["xp"] -= needed
 				cur_lvl += 1
 				f["level"] = cur_lvl
-				f["dps"] = IslandData.calculate_fighter_dps(f.get("base_dps", 25.0), cur_lvl, f.get("passive_id", "none"))
+				f["dps"] = IslandData.calculate_fighter_dps(f.get("base_dps", 25.0), cur_lvl, f.get("passive_id", "none")) * get_damage_multiplier()
 				fighter_leveled_up.emit(f["id"], cur_lvl)
 				any_leveled_up = true
 			else:
@@ -325,16 +360,27 @@ func gacha_pull(island_id: int) -> Dictionary:
 		system_message.emit("Moedas insuficientes para abrir a cápsula!", Color(1.0, 0.3, 0.3))
 		return {}
 		
+	# 4ª Conquista: Giro de personagem na ilha
+	gacha_spins += 1
+	_check_achievement_milestones()
+		
 	var roll = randf()
 	var selected_rarity = IslandData.RARITY_COMMON
 	
-	if roll < IslandData.RARITY_CHANCES[IslandData.RARITY_MYTHIC]:
+	# Apply luck multiplier from boss achievements
+	var luck = get_luck_multiplier()
+	var mythic_rate = min(0.20, IslandData.RARITY_CHANCES[IslandData.RARITY_MYTHIC] * luck)
+	var leg_rate = min(0.35, IslandData.RARITY_CHANCES[IslandData.RARITY_LEGENDARY] * luck)
+	var epic_rate = min(0.40, IslandData.RARITY_CHANCES[IslandData.RARITY_EPIC] * luck)
+	var rare_rate = min(0.50, IslandData.RARITY_CHANCES[IslandData.RARITY_RARE] * luck)
+	
+	if roll < mythic_rate:
 		selected_rarity = IslandData.RARITY_MYTHIC
-	elif roll < IslandData.RARITY_CHANCES[IslandData.RARITY_MYTHIC] + IslandData.RARITY_CHANCES[IslandData.RARITY_LEGENDARY]:
+	elif roll < mythic_rate + leg_rate:
 		selected_rarity = IslandData.RARITY_LEGENDARY
-	elif roll < IslandData.RARITY_CHANCES[IslandData.RARITY_MYTHIC] + IslandData.RARITY_CHANCES[IslandData.RARITY_LEGENDARY] + IslandData.RARITY_CHANCES[IslandData.RARITY_EPIC]:
+	elif roll < mythic_rate + leg_rate + epic_rate:
 		selected_rarity = IslandData.RARITY_EPIC
-	elif roll < IslandData.RARITY_CHANCES[IslandData.RARITY_MYTHIC] + IslandData.RARITY_CHANCES[IslandData.RARITY_LEGENDARY] + IslandData.RARITY_CHANCES[IslandData.RARITY_EPIC] + IslandData.RARITY_CHANCES[IslandData.RARITY_RARE]:
+	elif roll < mythic_rate + leg_rate + epic_rate + rare_rate:
 		selected_rarity = IslandData.RARITY_RARE
 	else:
 		selected_rarity = IslandData.RARITY_COMMON
@@ -372,3 +418,70 @@ func clear_target() -> void:
 	if current_target != null:
 		current_target = null
 		target_changed.emit(null)
+
+# --- ACHIEVEMENTS SYSTEM API ---
+func get_stat_for_category(category: String) -> float:
+	match category:
+		"time": return time_played
+		"enemies": return float(enemies_killed)
+		"coins": return coins_collected
+		"spins": return float(gacha_spins)
+		"bosses": return float(bosses_killed)
+	return 0.0
+
+func get_achievement_bonus(type: String) -> float:
+	var total: float = 0.0
+	for ach in IslandData.ACHIEVEMENTS:
+		if ach["reward_type"] == type and claimed_achievements.has(ach["id"]):
+			total += float(ach.get("reward_val", 0.0025))
+	return total
+
+func get_damage_multiplier() -> float:
+	return 1.0 + get_achievement_bonus("damage")
+
+func get_xp_multiplier() -> float:
+	return 1.0 + get_achievement_bonus("xp")
+
+func get_coin_multiplier() -> float:
+	return 1.0 + get_achievement_bonus("coins")
+
+func get_luck_multiplier() -> float:
+	return 1.0 + get_achievement_bonus("luck")
+
+func is_achievement_unlocked(ach_id: String) -> bool:
+	for ach in IslandData.ACHIEVEMENTS:
+		if ach["id"] == ach_id:
+			return get_stat_for_category(ach["category"]) >= ach["target"]
+	return false
+
+func is_achievement_claimed(ach_id: String) -> bool:
+	return claimed_achievements.has(ach_id)
+
+func claim_achievement(ach_id: String) -> bool:
+	if is_achievement_claimed(ach_id):
+		return false
+	var target_ach = {}
+	for ach in IslandData.ACHIEVEMENTS:
+		if ach["id"] == ach_id:
+			target_ach = ach
+			break
+	if target_ach.is_empty():
+		return false
+		
+	var cur_val = get_stat_for_category(target_ach["category"])
+	if cur_val < target_ach["target"]:
+		system_message.emit("Requisitos não atingidos para resgatar!", Color(1.0, 0.4, 0.4))
+		return false
+		
+	claimed_achievements.append(ach_id)
+	achievements_changed.emit()
+	
+	if target_ach["reward_type"] == "damage":
+		_recalc_all_fighters_stats()
+		
+	SaveManager.save_game()
+	system_message.emit("🏆 CONQUISTA RESGATADA: %s! (%s)" % [target_ach["title"], target_ach["reward_text"]], Color(1.0, 0.85, 0.2))
+	return true
+
+func request_open_achievements_ui() -> void:
+	open_achievements_ui_requested.emit()

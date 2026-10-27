@@ -491,3 +491,352 @@ static func format_number(val: float) -> String:
 		return "%.1fK" % (val / 1_000.0)
 	else:
 		return str(int(val))
+
+static func format_time(seconds: float) -> String:
+	var total_sec = int(max(0.0, seconds))
+	var hours = total_sec / 3600
+	var minutes = (total_sec % 3600) / 60
+	var secs = total_sec % 60
+	if hours > 0:
+		return "%dh %02dm" % [hours, minutes]
+	else:
+		return "%02dm %02ds" % [minutes, secs]
+
+# --- TABELA GLOBAL DE CONQUISTAS ---
+# 1. Tempo Jogado (1h, 2h, 5h, 10h, 24h, 48h, 72h, 100h) -> +0.25% Sorte nos giros da ilha
+# 2. Dinheiro Coletado (10, 100, 1.000, 100.000, 10.000.000, 100.000.000.000.000) -> +0.25% Moedas por mob/chefe morto
+# 3. Inimigos Mortos (1, 10, 50, 100, 200, 500, 1.000, 2.000) -> +0.25% Dano em qualquer inimigo
+# 4. Giros de Personagem (10, 100, 1.000, 5.000, 10.000) -> +0.25% Sorte nos giros da ilha
+const ACHIEVEMENTS: Array = [
+	# 1. TEMPO JOGADO (+0.25% de sorte nos giros de personagens da ilha)
+	{
+		"id": "time_1",
+		"category": "time",
+		"category_name": "Tempo Jogado",
+		"icon": "⏳",
+		"title": "Aventureiro Iniciante I",
+		"description": "Jogue por 1 hora",
+		"target": 3600.0,
+		"reward_type": "luck",
+		"reward_val": 0.0025,
+		"reward_text": "+0.25% Sorte na Ilha"
+	},
+	{
+		"id": "time_2",
+		"category": "time",
+		"category_name": "Tempo Jogado",
+		"icon": "⏳",
+		"title": "Aventureiro Focado II",
+		"description": "Jogue por 2 horas",
+		"target": 7200.0,
+		"reward_type": "luck",
+		"reward_val": 0.0025,
+		"reward_text": "+0.25% Sorte na Ilha"
+	},
+	{
+		"id": "time_5",
+		"category": "time",
+		"category_name": "Tempo Jogado",
+		"icon": "⏳",
+		"title": "Guerreiro Dedicado III",
+		"description": "Jogue por 5 horas",
+		"target": 18000.0,
+		"reward_type": "luck",
+		"reward_val": 0.0025,
+		"reward_text": "+0.25% Sorte na Ilha"
+	},
+	{
+		"id": "time_10",
+		"category": "time",
+		"category_name": "Tempo Jogado",
+		"icon": "⏳",
+		"title": "Lutador Experiente IV",
+		"description": "Jogue por 10 horas",
+		"target": 36000.0,
+		"reward_type": "luck",
+		"reward_val": 0.0025,
+		"reward_text": "+0.25% Sorte na Ilha"
+	},
+	{
+		"id": "time_24",
+		"category": "time",
+		"category_name": "Tempo Jogado",
+		"icon": "⏳",
+		"title": "Dia Completo V",
+		"description": "Jogue por 24 horas",
+		"target": 86400.0,
+		"reward_type": "luck",
+		"reward_val": 0.0025,
+		"reward_text": "+0.25% Sorte na Ilha"
+	},
+	{
+		"id": "time_48",
+		"category": "time",
+		"category_name": "Tempo Jogado",
+		"icon": "⏳",
+		"title": "Veterano do Anime VI",
+		"description": "Jogue por 48 horas",
+		"target": 172800.0,
+		"reward_type": "luck",
+		"reward_val": 0.0025,
+		"reward_text": "+0.25% Sorte na Ilha"
+	},
+	{
+		"id": "time_72",
+		"category": "time",
+		"category_name": "Tempo Jogado",
+		"icon": "⏳",
+		"title": "Mestre Incansável VII",
+		"description": "Jogue por 72 horas",
+		"target": 259200.0,
+		"reward_type": "luck",
+		"reward_val": 0.0025,
+		"reward_text": "+0.25% Sorte na Ilha"
+	},
+	{
+		"id": "time_100",
+		"category": "time",
+		"category_name": "Tempo Jogado",
+		"icon": "⏳",
+		"title": "Lenda Suprema VIII",
+		"description": "Jogue por 100 horas",
+		"target": 360000.0,
+		"reward_type": "luck",
+		"reward_val": 0.0025,
+		"reward_text": "+0.25% Sorte na Ilha"
+	},
+
+	# 2. DINHEIRO COLETADO (+0.25% de moedas a mais por inimigo/chefe morto)
+	{
+		"id": "coins_10",
+		"category": "coins",
+		"category_name": "Dinheiro Coletado",
+		"icon": "🪙",
+		"title": "Primeiros Tostões I",
+		"description": "Colete 10 moedas",
+		"target": 10.0,
+		"reward_type": "coins",
+		"reward_val": 0.0025,
+		"reward_text": "+0.25% Moedas de Mobs/Chefes"
+	},
+	{
+		"id": "coins_100",
+		"category": "coins",
+		"category_name": "Dinheiro Coletado",
+		"icon": "🪙",
+		"title": "Bolsos Cheios II",
+		"description": "Colete 100 moedas",
+		"target": 100.0,
+		"reward_type": "coins",
+		"reward_val": 0.0025,
+		"reward_text": "+0.25% Moedas de Mobs/Chefes"
+	},
+	{
+		"id": "coins_1000",
+		"category": "coins",
+		"category_name": "Dinheiro Coletado",
+		"icon": "🪙",
+		"title": "Pequena Fortuna III",
+		"description": "Colete 1.000 moedas",
+		"target": 1000.0,
+		"reward_type": "coins",
+		"reward_val": 0.0025,
+		"reward_text": "+0.25% Moedas de Mobs/Chefes"
+	},
+	{
+		"id": "coins_100000",
+		"category": "coins",
+		"category_name": "Dinheiro Coletado",
+		"icon": "🪙",
+		"title": "Cofre de Ouro IV",
+		"description": "Colete 100.000 moedas",
+		"target": 100000.0,
+		"reward_type": "coins",
+		"reward_val": 0.0025,
+		"reward_text": "+0.25% Moedas de Mobs/Chefes"
+	},
+	{
+		"id": "coins_10000000",
+		"category": "coins",
+		"category_name": "Dinheiro Coletado",
+		"icon": "🪙",
+		"title": "Magnata Multimilionário V",
+		"description": "Colete 10.000.000 moedas",
+		"target": 10000000.0,
+		"reward_type": "coins",
+		"reward_val": 0.0025,
+		"reward_text": "+0.25% Moedas de Mobs/Chefes"
+	},
+	{
+		"id": "coins_100000000000000",
+		"category": "coins",
+		"category_name": "Dinheiro Coletado",
+		"icon": "🪙",
+		"title": "Lorde Trilionário VI",
+		"description": "Colete 100.000.000.000.000 moedas",
+		"target": 100000000000000.0,
+		"reward_type": "coins",
+		"reward_val": 0.0025,
+		"reward_text": "+0.25% Moedas de Mobs/Chefes"
+	},
+
+	# 3. INIMIGO MORTO (CHEFE OU INIMIGO COMUM) (+0.25% de dano em qualquer inimigo)
+	{
+		"id": "kills_1",
+		"category": "enemies",
+		"category_name": "Inimigos Derrotados",
+		"icon": "⚔️",
+		"title": "Primeiro Sangue I",
+		"description": "Derrote 1 inimigo ou chefe",
+		"target": 1.0,
+		"reward_type": "damage",
+		"reward_val": 0.0025,
+		"reward_text": "+0.25% Dano em Qualquer Inimigo"
+	},
+	{
+		"id": "kills_10",
+		"category": "enemies",
+		"category_name": "Inimigos Derrotados",
+		"icon": "⚔️",
+		"title": "Guerreiro Emergente II",
+		"description": "Derrote 10 inimigos ou chefes",
+		"target": 10.0,
+		"reward_type": "damage",
+		"reward_val": 0.0025,
+		"reward_text": "+0.25% Dano em Qualquer Inimigo"
+	},
+	{
+		"id": "kills_50",
+		"category": "enemies",
+		"category_name": "Inimigos Derrotados",
+		"icon": "⚔️",
+		"title": "Caçador Hábil III",
+		"description": "Derrote 50 inimigos ou chefes",
+		"target": 50.0,
+		"reward_type": "damage",
+		"reward_val": 0.0025,
+		"reward_text": "+0.25% Dano em Qualquer Inimigo"
+	},
+	{
+		"id": "kills_100",
+		"category": "enemies",
+		"category_name": "Inimigos Derrotados",
+		"icon": "⚔️",
+		"title": "Centurião dos Campos IV",
+		"description": "Derrote 100 inimigos ou chefes",
+		"target": 100.0,
+		"reward_type": "damage",
+		"reward_val": 0.0025,
+		"reward_text": "+0.25% Dano em Qualquer Inimigo"
+	},
+	{
+		"id": "kills_200",
+		"category": "enemies",
+		"category_name": "Inimigos Derrotados",
+		"icon": "⚔️",
+		"title": "Destruidor da Vanguarda V",
+		"description": "Derrote 200 inimigos ou chefes",
+		"target": 200.0,
+		"reward_type": "damage",
+		"reward_val": 0.0025,
+		"reward_text": "+0.25% Dano em Qualquer Inimigo"
+	},
+	{
+		"id": "kills_500",
+		"category": "enemies",
+		"category_name": "Inimigos Derrotados",
+		"icon": "⚔️",
+		"title": "Exterminador Implacável VI",
+		"description": "Derrote 500 inimigos ou chefes",
+		"target": 500.0,
+		"reward_type": "damage",
+		"reward_val": 0.0025,
+		"reward_text": "+0.25% Dano em Qualquer Inimigo"
+	},
+	{
+		"id": "kills_1000",
+		"category": "enemies",
+		"category_name": "Inimigos Derrotados",
+		"icon": "⚔️",
+		"title": "Lenda das Batalhas VII",
+		"description": "Derrote 1.000 inimigos ou chefes",
+		"target": 1000.0,
+		"reward_type": "damage",
+		"reward_val": 0.0025,
+		"reward_text": "+0.25% Dano em Qualquer Inimigo"
+	},
+	{
+		"id": "kills_2000",
+		"category": "enemies",
+		"category_name": "Inimigos Derrotados",
+		"icon": "⚔️",
+		"title": "Conquistador Supremo VIII",
+		"description": "Derrote 2.000 inimigos ou chefes",
+		"target": 2000.0,
+		"reward_type": "damage",
+		"reward_val": 0.0025,
+		"reward_text": "+0.25% Dano em Qualquer Inimigo"
+	},
+
+	# 4. GIRO DE PERSONAGEM (+0.25% de sorte nos giros de personagens da ilha)
+	{
+		"id": "spins_10",
+		"category": "spins",
+		"category_name": "Giros de Personagem",
+		"icon": "🎰",
+		"title": "Colecionador Iniciante I",
+		"description": "Gire personagens da ilha 10 vezes",
+		"target": 10.0,
+		"reward_type": "luck",
+		"reward_val": 0.0025,
+		"reward_text": "+0.25% Sorte na Ilha"
+	},
+	{
+		"id": "spins_100",
+		"category": "spins",
+		"category_name": "Giros de Personagem",
+		"icon": "🎰",
+		"title": "Invocador Confiante II",
+		"description": "Gire personagens da ilha 100 vezes",
+		"target": 100.0,
+		"reward_type": "luck",
+		"reward_val": 0.0025,
+		"reward_text": "+0.25% Sorte na Ilha"
+	},
+	{
+		"id": "spins_1000",
+		"category": "spins",
+		"category_name": "Giros de Personagem",
+		"icon": "🎰",
+		"title": "Mestre Invocador III",
+		"description": "Gire personagens da ilha 1.000 vezes",
+		"target": 1000.0,
+		"reward_type": "luck",
+		"reward_val": 0.0025,
+		"reward_text": "+0.25% Sorte na Ilha"
+	},
+	{
+		"id": "spins_5000",
+		"category": "spins",
+		"category_name": "Giros de Personagem",
+		"icon": "🎰",
+		"title": "Senhor dos Destinos IV",
+		"description": "Gire personagens da ilha 5.000 vezes",
+		"target": 5000.0,
+		"reward_type": "luck",
+		"reward_val": 0.0025,
+		"reward_text": "+0.25% Sorte na Ilha"
+	},
+	{
+		"id": "spins_10000",
+		"category": "spins",
+		"category_name": "Giros de Personagem",
+		"icon": "🎰",
+		"title": "Divindade dos Giros V",
+		"description": "Gire personagens da ilha 10.000 vezes",
+		"target": 10000.0,
+		"reward_type": "luck",
+		"reward_val": 0.0025,
+		"reward_text": "+0.25% Sorte na Ilha"
+	}
+]

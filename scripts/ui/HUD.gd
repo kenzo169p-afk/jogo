@@ -16,11 +16,13 @@ extends CanvasLayer
 @onready var btn_inventory: Button = $ActionButtons/BtnInventory
 @onready var btn_islands: Button = $ActionButtons/BtnIslands
 @onready var btn_passives: Button = $ActionButtons.get_node_or_null("BtnPassives")
+@onready var btn_achievements: Button = $ActionButtons.get_node_or_null("BtnAchievements")
 @onready var btn_equip_best: Button = $ActionButtons/BtnEquipBest
 @onready var btn_save: Button = $ActionButtons/BtnSave
 
 @export var inventory_ui: Control
 @export var island_menu_ui: Control
+@export var achievements_ui: Control
 
 var current_target_node: Node = null
 var notify_tween: Tween
@@ -37,6 +39,8 @@ func _ready() -> void:
 	btn_islands.pressed.connect(_on_islands_pressed)
 	if btn_passives:
 		btn_passives.pressed.connect(_on_passives_pressed)
+	if btn_achievements:
+		btn_achievements.pressed.connect(_on_achievements_pressed)
 	btn_equip_best.pressed.connect(_on_equip_best_pressed)
 	btn_save.pressed.connect(_on_save_pressed)
 	
@@ -66,6 +70,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			_on_islands_pressed()
 		elif event.keycode == KEY_P:
 			_on_passives_pressed()
+		elif event.keycode == KEY_C:
+			_on_achievements_pressed()
 
 func _update_island_info() -> void:
 	var island = IslandData.get_island(GameManager.current_island)
@@ -118,13 +124,33 @@ func _on_game_saved() -> void:
 func _on_inventory_pressed() -> void:
 	if inventory_ui:
 		inventory_ui.visible = not inventory_ui.visible
+		if inventory_ui.visible:
+			if island_menu_ui: island_menu_ui.visible = false
+			if achievements_ui: achievements_ui.visible = false
 
 func _on_islands_pressed() -> void:
 	if island_menu_ui:
 		island_menu_ui.visible = not island_menu_ui.visible
+		if island_menu_ui.visible:
+			if inventory_ui: inventory_ui.visible = false
+			if achievements_ui: achievements_ui.visible = false
 
 func _on_passives_pressed() -> void:
+	if inventory_ui: inventory_ui.visible = false
+	if island_menu_ui: island_menu_ui.visible = false
+	if achievements_ui: achievements_ui.visible = false
 	GameManager.request_open_passive_ui(GameManager.current_island)
+
+func _on_achievements_pressed() -> void:
+	if achievements_ui:
+		achievements_ui.visible = not achievements_ui.visible
+		if achievements_ui.visible:
+			if inventory_ui: inventory_ui.visible = false
+			if island_menu_ui: island_menu_ui.visible = false
+			var p_ui = get_node_or_null("../PassiveUI")
+			if p_ui: p_ui.visible = false
+			if achievements_ui.has_method("refresh_ui"):
+				achievements_ui.refresh_ui()
 
 func _on_equip_best_pressed() -> void:
 	GameManager.equip_best_fighters()

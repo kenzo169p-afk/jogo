@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://c11inv001" path="res://scenes/ui/InventoryUI.tscn" id="4_inv"]
 [ext_resource type="PackedScene" uid="uid://c12islandmenu001" path="res://scenes/ui/IslandMenuUI.tscn" id="5_menu"]
 [ext_resource type="PackedScene" uid="uid://c16passiveui001" path="res://scenes/ui/PassiveUI.tscn" id="6_passiveui"]
+[ext_resource type="PackedScene" uid="uid://c17achieveui001" path="res://scenes/ui/AchievementsUI.tscn" id="7_achieveui"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
 sky_top_color = Color(0.38, 0.65, 0.95, 1)
@@ -63,13 +64,16 @@ shadow_enabled = false
 [node name="Player" parent="." instance=ExtResource("2_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 6)
 
-[node name="HUD" parent="." node_paths=PackedStringArray("inventory_ui", "island_menu_ui") instance=ExtResource("3_hud")]
+[node name="HUD" parent="." node_paths=PackedStringArray("inventory_ui", "island_menu_ui", "achievements_ui") instance=ExtResource("3_hud")]
 inventory_ui = NodePath("../InventoryUI")
 island_menu_ui = NodePath("../IslandMenuUI")
+achievements_ui = NodePath("../AchievementsUI")
 
 [node name="InventoryUI" parent="." instance=ExtResource("4_inv")]
 
 [node name="IslandMenuUI" parent="." instance=ExtResource("5_menu")]
 
 [node name="PassiveUI" parent="." instance=ExtResource("6_passiveui")]
+
+[node name="AchievementsUI" parent="." instance=ExtResource("7_achieveui")]
 

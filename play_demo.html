@@ -442,7 +442,175 @@
             font-size: 12px;
         }
 
-        /* DAMAGE NUMBERS OVERLAY */
+        /* DAMAGE NUMBERS OVERLAY (GPU ACCELERATED & OPTIMIZED) */
+        .damage-number {
+            position: absolute;
+            font-weight: 900;
+            font-size: 19px;
+            color: #ff4757;
+            text-shadow: 0 2px 4px #000, 0 0 8px rgba(0,0,0,0.9);
+            pointer-events: none;
+            z-index: 5;
+            will-change: transform, opacity;
+            transition: transform 0.6s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.6s ease-out;
+        }
+
+        /* ACHIEVEMENTS UI STYLES */
+        .ach-summary-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .ach-bonus-badge {
+            flex: 1;
+            min-width: 170px;
+            background: rgba(14, 20, 30, 0.85);
+            border: 1.5px solid;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .ach-bonus-badge b {
+            font-size: 14px;
+        }
+        .ach-category-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .ach-tab-btn {
+            background: #192231;
+            border: 1px solid #3d5375;
+            color: #bdc3c7;
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .ach-tab-btn:hover {
+            background: #222e42;
+            color: #fff;
+            border-color: #55d6ff;
+        }
+        .ach-tab-btn.active {
+            background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%);
+            color: #ffd32a;
+            border-color: #ffd32a;
+            box-shadow: 0 0 10px rgba(255, 211, 42, 0.25);
+        }
+        .ach-list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .ach-card {
+            background: linear-gradient(90deg, rgba(22, 30, 44, 0.95) 0%, rgba(16, 22, 32, 0.95) 100%);
+            border: 1px solid #2d3b52;
+            border-radius: 10px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            transition: transform 0.15s ease, border-color 0.15s ease;
+        }
+        .ach-card.ready {
+            border-color: #2ecc71;
+            background: linear-gradient(90deg, rgba(25, 45, 35, 0.95) 0%, rgba(18, 30, 24, 0.95) 100%);
+            box-shadow: 0 0 14px rgba(46, 204, 113, 0.25);
+        }
+        .ach-card.claimed {
+            opacity: 0.65;
+            border-color: #1f2838;
+        }
+        .ach-icon-box {
+            font-size: 26px;
+            width: 40px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .ach-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .ach-title-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .ach-title {
+            font-size: 14px;
+            font-weight: 800;
+            color: #ecf0f1;
+        }
+        .ach-reward-badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 6px;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid;
+        }
+        .ach-desc {
+            font-size: 12px;
+            color: #95a5a6;
+        }
+        .ach-progress-outer {
+            width: 100%;
+            height: 7px;
+            background: #101622;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.08);
+            margin-top: 3px;
+        }
+        .ach-progress-inner {
+            height: 100%;
+            background: linear-gradient(90deg, #2ecc71, #55d6ff);
+            transition: width 0.2s ease;
+        }
+        .ach-claim-btn {
+            min-width: 110px;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            border: 1.5px solid;
+            transition: all 0.15s ease;
+        }
+        .ach-claim-btn.ready {
+            background: linear-gradient(180deg, #2ecc71 0%, #27ae60 100%);
+            border-color: #2ecc71;
+            color: #fff;
+            animation: pulseClaim 1.5s infinite;
+        }
+        @keyframes pulseClaim {
+            0% { transform: scale(1); box-shadow: 0 0 0 rgba(46, 204, 113, 0.4); }
+            50% { transform: scale(1.04); box-shadow: 0 0 16px rgba(46, 204, 113, 0.8); }
+            100% { transform: scale(1); box-shadow: 0 0 0 rgba(46, 204, 113, 0.4); }
+        }
+        .ach-claim-btn.claimed {
+            background: #19202c;
+            border-color: #2d3b52;
+            color: #7f8c8d;
+            cursor: default;
+        }
+        .ach-claim-btn.locked {
+            background: #151a24;
+            border-color: #2c384c;
+            color: #636e72;
+            cursor: default;
+        }
         .damage-number {
             position: absolute;
             font-weight: 900;
@@ -487,6 +655,7 @@
         <button class="btn" id="btn-inventory">Inventário [I]</button>
         <button class="btn" id="btn-islands">Ilhas [M]</button>
         <button class="btn btn-yellow" id="btn-passives">Passivas [P]</button>
+        <button class="btn" id="btn-achievements" style="border-color:#f39c12; color:#f39c12;">Conquistas [C]</button>
         <button class="btn btn-green" id="btn-equip-best">Equipar Melhores</button>
         <button class="btn" id="btn-save">Salvar Jogo</button>
     </div>
@@ -501,7 +670,8 @@
     <div id="controls-badge">
         <b>[WASD]</b> Mover &nbsp;|&nbsp; <b>[SHIFT]</b> Sprint Corrida<br>
         <b>[Espaço]</b> Pular &nbsp;|&nbsp; <b>[Botão Direito]</b> Girar Câmera<br>
-        <b>[Clique Esquerdo]</b> Focar Inimigo &nbsp;|&nbsp; <b>[E]</b> Interagir
+        <b>[Clique Esquerdo]</b> Focar Inimigo &nbsp;|&nbsp; <b>[E]</b> Interagir<br>
+        <b>[C]</b> Conquistas &nbsp;|&nbsp; <b>[I]</b> Inventário &nbsp;|&nbsp; <b>[P]</b> Passivas
     </div>
 
     <!-- INVENTORY MODAL -->
@@ -526,6 +696,37 @@
             <button class="modal-close" id="modal-close-islands">&times;</button>
         </div>
         <div class="modal-content" id="island-rows-container"></div>
+    </div>
+
+    <!-- ACHIEVEMENTS MODAL -->
+    <div class="modal" id="modal-achievements">
+        <div class="modal-header">
+            <div class="modal-title" style="color:#ffd32a;">🏆 CONQUISTAS & BÔNUS PERMANENTES</div>
+            <button class="modal-close" id="modal-close-achievements">&times;</button>
+        </div>
+        <!-- Summary Bonus Bar -->
+        <div class="ach-summary-bar">
+            <div class="ach-bonus-badge" style="color:#ff6b81; border-color:#ff4757;">
+                <span>⚔️ Bônus de Dano:</span> <b id="ach-summary-damage">+0.00%</b>
+            </div>
+            <div class="ach-bonus-badge" style="color:#ffd32a; border-color:#f1c40f;">
+                <span>🪙 Moedas Mobs/Chefes:</span> <b id="ach-summary-coins">+0.00%</b>
+            </div>
+            <div class="ach-bonus-badge" style="color:#2ecc71; border-color:#27ae60;">
+                <span>🍀 Sorte Giros da Ilha:</span> <b id="ach-summary-luck">+0.00%</b>
+            </div>
+        </div>
+        <!-- Category Tabs -->
+        <div class="ach-category-tabs">
+            <button class="ach-tab-btn active" data-cat="all" id="ach-tab-all">Todas (27)</button>
+            <button class="ach-tab-btn" data-cat="time" id="ach-tab-time">⏳ Tempo Jogado (8)</button>
+            <button class="ach-tab-btn" data-cat="coins" id="ach-tab-coins">🪙 Dinheiro Coletado (6)</button>
+            <button class="ach-tab-btn" data-cat="enemies" id="ach-tab-enemies">⚔️ Inimigos Mortos (8)</button>
+            <button class="ach-tab-btn" data-cat="spins" id="ach-tab-spins">🎰 Giros de Personagem (5)</button>
+        </div>
+        <div class="modal-content" style="padding-right: 4px;">
+            <div id="achievements-list-container" class="ach-list-container"></div>
+        </div>
     </div>
 
     <!-- PASSIVE MACHINE MODAL -->
@@ -838,6 +1039,57 @@
             return chosen.id;
         }
 
+                /* --- ACHIEVEMENTS DEFINITION (4 CATEGORIES) --- */
+        // 1. Tempo Jogado (+0.25% em sorte nos giros da ilha apenas)
+        // 2. Dinheiro Coletado (+0.25% de moeda a mais por mob/chefe)
+        // 3. Inimigo Morto Chefe ou Comum (+0.25% de dano em qualquer inimigo)
+        // 4. Giro de Personagem (+0.25% em sorte nos giros da ilha apenas)
+        const ACHIEVEMENTS = [
+            // 1. Tempo Jogado
+            { id: "time_1", category: "time", category_name: "Tempo Jogado", icon: "⏳", title: "Aventureiro Iniciante I", description: "Jogue por 1 hora", target: 3600, reward_type: "luck", reward_val: 0.0025, reward_text: "+0.25% Sorte na Ilha" },
+            { id: "time_2", category: "time", category_name: "Tempo Jogado", icon: "⏳", title: "Aventureiro Focado II", description: "Jogue por 2 horas", target: 7200, reward_type: "luck", reward_val: 0.0025, reward_text: "+0.25% Sorte na Ilha" },
+            { id: "time_5", category: "time", category_name: "Tempo Jogado", icon: "⏳", title: "Guerreiro Dedicado III", description: "Jogue por 5 horas", target: 18000, reward_type: "luck", reward_val: 0.0025, reward_text: "+0.25% Sorte na Ilha" },
+            { id: "time_10", category: "time", category_name: "Tempo Jogado", icon: "⏳", title: "Lutador Experiente IV", description: "Jogue por 10 horas", target: 36000, reward_type: "luck", reward_val: 0.0025, reward_text: "+0.25% Sorte na Ilha" },
+            { id: "time_24", category: "time", category_name: "Tempo Jogado", icon: "⏳", title: "Dia Completo V", description: "Jogue por 24 horas", target: 86400, reward_type: "luck", reward_val: 0.0025, reward_text: "+0.25% Sorte na Ilha" },
+            { id: "time_48", category: "time", category_name: "Tempo Jogado", icon: "⏳", title: "Veterano do Anime VI", description: "Jogue por 48 horas", target: 172800, reward_type: "luck", reward_val: 0.0025, reward_text: "+0.25% Sorte na Ilha" },
+            { id: "time_72", category: "time", category_name: "Tempo Jogado", icon: "⏳", title: "Mestre Incansável VII", description: "Jogue por 72 horas", target: 259200, reward_type: "luck", reward_val: 0.0025, reward_text: "+0.25% Sorte na Ilha" },
+            { id: "time_100", category: "time", category_name: "Tempo Jogado", icon: "⏳", title: "Lenda Suprema VIII", description: "Jogue por 100 horas", target: 360000, reward_type: "luck", reward_val: 0.0025, reward_text: "+0.25% Sorte na Ilha" },
+
+            // 2. Dinheiro Coletado
+            { id: "coins_10", category: "coins", category_name: "Dinheiro Coletado", icon: "🪙", title: "Primeiros Tostões I", description: "Colete 10 moedas", target: 10, reward_type: "coins", reward_val: 0.0025, reward_text: "+0.25% Moedas de Mobs/Chefes" },
+            { id: "coins_100", category: "coins", category_name: "Dinheiro Coletado", icon: "🪙", title: "Bolsos Cheios II", description: "Colete 100 moedas", target: 100, reward_type: "coins", reward_val: 0.0025, reward_text: "+0.25% Moedas de Mobs/Chefes" },
+            { id: "coins_1000", category: "coins", category_name: "Dinheiro Coletado", icon: "🪙", title: "Pequena Fortuna III", description: "Colete 1.000 moedas", target: 1000, reward_type: "coins", reward_val: 0.0025, reward_text: "+0.25% Moedas de Mobs/Chefes" },
+            { id: "coins_100000", category: "coins", category_name: "Dinheiro Coletado", icon: "🪙", title: "Cofre de Ouro IV", description: "Colete 100.000 moedas", target: 100000, reward_type: "coins", reward_val: 0.0025, reward_text: "+0.25% Moedas de Mobs/Chefes" },
+            { id: "coins_10000000", category: "coins", category_name: "Dinheiro Coletado", icon: "🪙", title: "Magnata Multimilionário V", description: "Colete 10.000.000 moedas", target: 10000000, reward_type: "coins", reward_val: 0.0025, reward_text: "+0.25% Moedas de Mobs/Chefes" },
+            { id: "coins_100000000000000", category: "coins", category_name: "Dinheiro Coletado", icon: "🪙", title: "Lorde Trilionário VI", description: "Colete 100.000.000.000.000 moedas", target: 100000000000000, reward_type: "coins", reward_val: 0.0025, reward_text: "+0.25% Moedas de Mobs/Chefes" },
+
+            // 3. Inimigo Morto (Chefe ou Inimigo Comum)
+            { id: "kills_1", category: "enemies", category_name: "Inimigos Derrotados", icon: "⚔️", title: "Primeiro Sangue I", description: "Derrote 1 inimigo ou chefe", target: 1, reward_type: "damage", reward_val: 0.0025, reward_text: "+0.25% Dano em Qualquer Inimigo" },
+            { id: "kills_10", category: "enemies", category_name: "Inimigos Derrotados", icon: "⚔️", title: "Guerreiro Emergente II", description: "Derrote 10 inimigos ou chefes", target: 10, reward_type: "damage", reward_val: 0.0025, reward_text: "+0.25% Dano em Qualquer Inimigo" },
+            { id: "kills_50", category: "enemies", category_name: "Inimigos Derrotados", icon: "⚔️", title: "Caçador Hábil III", description: "Derrote 50 inimigos ou chefes", target: 50, reward_type: "damage", reward_val: 0.0025, reward_text: "+0.25% Dano em Qualquer Inimigo" },
+            { id: "kills_100", category: "enemies", category_name: "Inimigos Derrotados", icon: "⚔️", title: "Centurião dos Campos IV", description: "Derrote 100 inimigos ou chefes", target: 100, reward_type: "damage", reward_val: 0.0025, reward_text: "+0.25% Dano em Qualquer Inimigo" },
+            { id: "kills_200", category: "enemies", category_name: "Inimigos Derrotados", icon: "⚔️", title: "Destruidor da Vanguarda V", description: "Derrote 200 inimigos ou chefes", target: 200, reward_type: "damage", reward_val: 0.0025, reward_text: "+0.25% Dano em Qualquer Inimigo" },
+            { id: "kills_500", category: "enemies", category_name: "Inimigos Derrotados", icon: "⚔️", title: "Exterminador Implacável VI", description: "Derrote 500 inimigos ou chefes", target: 500, reward_type: "damage", reward_val: 0.0025, reward_text: "+0.25% Dano em Qualquer Inimigo" },
+            { id: "kills_1000", category: "enemies", category_name: "Inimigos Derrotados", icon: "⚔️", title: "Lenda das Batalhas VII", description: "Derrote 1.000 inimigos ou chefes", target: 1000, reward_type: "damage", reward_val: 0.0025, reward_text: "+0.25% Dano em Qualquer Inimigo" },
+            { id: "kills_2000", category: "enemies", category_name: "Inimigos Derrotados", icon: "⚔️", title: "Conquistador Supremo VIII", description: "Derrote 2.000 inimigos ou chefes", target: 2000, reward_type: "damage", reward_val: 0.0025, reward_text: "+0.25% Dano em Qualquer Inimigo" },
+
+            // 4. Giro de Personagem
+            { id: "spins_10", category: "spins", category_name: "Giros de Personagem", icon: "🎰", title: "Colecionador Iniciante I", description: "Gire personagens da ilha 10 vezes", target: 10, reward_type: "luck", reward_val: 0.0025, reward_text: "+0.25% Sorte na Ilha" },
+            { id: "spins_100", category: "spins", category_name: "Giros de Personagem", icon: "🎰", title: "Invocador Confiante II", description: "Gire personagens da ilha 100 vezes", target: 100, reward_type: "luck", reward_val: 0.0025, reward_text: "+0.25% Sorte na Ilha" },
+            { id: "spins_1000", category: "spins", category_name: "Giros de Personagem", icon: "🎰", title: "Mestre Invocador III", description: "Gire personagens da ilha 1.000 vezes", target: 1000, reward_type: "luck", reward_val: 0.0025, reward_text: "+0.25% Sorte na Ilha" },
+            { id: "spins_5000", category: "spins", category_name: "Giros de Personagem", icon: "🎰", title: "Senhor dos Destinos IV", description: "Gire personagens da ilha 5.000 vezes", target: 5000, reward_type: "luck", reward_val: 0.0025, reward_text: "+0.25% Sorte na Ilha" },
+            { id: "spins_10000", category: "spins", category_name: "Giros de Personagem", icon: "🎰", title: "Divindade dos Giros V", description: "Gire personagens da ilha 10.000 vezes", target: 10000, reward_type: "luck", reward_val: 0.0025, reward_text: "+0.25% Sorte na Ilha" }
+        ];
+
+        function formatDuration(sec) {
+            sec = Math.floor(sec);
+            const h = Math.floor(sec / 3600);
+            const m = Math.floor((sec % 3600) / 60);
+            const s = sec % 60;
+            if (h > 0) return `${h}h ${m < 10 ? '0' : ''}${m}m`;
+            return `${m}m ${s < 10 ? '0' : ''}${s}s`;
+        }
+
         /* --- GAME STATE & LOCALSTORAGE --- */
         let state = {
             currencies: { "coins": 100 },
@@ -846,8 +1098,156 @@
             inventory: [
                 { id: "starter_01", name: "Clone de Naruto", rarity: RARITY_COMMON, base_dps: 25, dps: 25, level: 1, xp: 0, passive_id: "none", color: 0xf39c12 }
             ],
-            equipped_ids: ["starter_01"]
+            equipped_ids: ["starter_01"],
+            time_played: 0,
+            coins_collected: 0,
+            enemies_killed: 0,
+            gacha_spins: 0,
+            claimed_achievements: []
         };
+
+
+        /* --- ACHIEVEMENTS SYSTEM API & CALCULATIONS --- */
+        let currentAchFilter = 'all';
+        const notifiedAchievements = {};
+
+        function getStatForCategory(category) {
+            if (category === 'time') return state.time_played || 0;
+            if (category === 'coins') return state.coins_collected || 0;
+            if (category === 'enemies') return state.enemies_killed || 0;
+            if (category === 'spins') return state.gacha_spins || 0;
+            return 0;
+        }
+
+        function getAchievementBonus(type) {
+            let total = 0.0;
+            const claimed = state.claimed_achievements || [];
+            ACHIEVEMENTS.forEach(ach => {
+                if (ach.reward_type === type && claimed.includes(ach.id)) {
+                    total += ach.reward_val;
+                }
+            });
+            return total;
+        }
+
+        function getDamageMultiplier() {
+            return 1.0 + getAchievementBonus('damage');
+        }
+
+        function getCoinMultiplier() {
+            return 1.0 + getAchievementBonus('coins');
+        }
+
+        function getLuckMultiplier() {
+            return 1.0 + getAchievementBonus('luck');
+        }
+
+        function checkAchievementMilestones() {
+            const claimed = state.claimed_achievements || [];
+            ACHIEVEMENTS.forEach(ach => {
+                if (!claimed.includes(ach.id) && !notifiedAchievements[ach.id]) {
+                    if (getStatForCategory(ach.category) >= ach.target) {
+                        notifiedAchievements[ach.id] = true;
+                        showNotification(`🏆 CONQUISTA PRONTA: ${ach.title}! [C] para resgatar.`, "#ffd32a");
+                    }
+                }
+            });
+        }
+
+        function claimAchievement(achId) {
+            if (!state.claimed_achievements) state.claimed_achievements = [];
+            if (state.claimed_achievements.includes(achId)) return;
+            const ach = ACHIEVEMENTS.find(a => a.id === achId);
+            if (!ach) return;
+            const curVal = getStatForCategory(ach.category);
+            if (curVal < ach.target) {
+                showNotification("Requisitos não atingidos para resgatar!", "#e74c3c");
+                return;
+            }
+            state.claimed_achievements.push(achId);
+            playSound('gacha');
+            showNotification(`🏆 CONQUISTA RESGATADA: ${ach.title}! (${ach.reward_text})`, "#ffd32a");
+            renderAchievementsModal();
+            updateHUD();
+            saveGame();
+        }
+
+        function setAchievementFilter(cat) {
+            currentAchFilter = cat;
+            document.querySelectorAll('.ach-tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.cat === cat);
+            });
+            renderAchievementsModal();
+        }
+
+        function renderAchievementsModal() {
+            // Update Summary
+            const dmgBonus = (getAchievementBonus('damage') * 100).toFixed(2);
+            const coinBonus = (getAchievementBonus('coins') * 100).toFixed(2);
+            const luckBonus = (getAchievementBonus('luck') * 100).toFixed(2);
+
+            const dmgEl = document.getElementById('ach-summary-damage');
+            const coinEl = document.getElementById('ach-summary-coins');
+            const luckEl = document.getElementById('ach-summary-luck');
+            if (dmgEl) dmgEl.innerText = `+${dmgBonus}%`;
+            if (coinEl) coinEl.innerText = `+${coinBonus}%`;
+            if (luckEl) luckEl.innerText = `+${luckBonus}%`;
+
+            const container = document.getElementById('achievements-list-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const claimed = state.claimed_achievements || [];
+
+            ACHIEVEMENTS.forEach(ach => {
+                if (currentAchFilter !== 'all' && ach.category !== currentAchFilter) return;
+
+                const curVal = getStatForCategory(ach.category);
+                const isClaimed = claimed.includes(ach.id);
+                const isReady = !isClaimed && (curVal >= ach.target);
+                const pct = Math.min(100, Math.floor((curVal / ach.target) * 100));
+
+                let curStr = formatNum(curVal);
+                let tgtStr = formatNum(ach.target);
+                if (ach.category === 'time') {
+                    curStr = formatDuration(curVal);
+                    tgtStr = formatDuration(ach.target);
+                }
+
+                let badgeColor = '#55d6ff';
+                if (ach.reward_type === 'damage') badgeColor = '#ff6b81';
+                else if (ach.reward_type === 'coins') badgeColor = '#ffd32a';
+                else if (ach.reward_type === 'luck') badgeColor = '#2ecc71';
+
+                const card = document.createElement('div');
+                card.className = `ach-card ${isClaimed ? 'claimed' : (isReady ? 'ready' : '')}`;
+
+                let btnHtml = '';
+                if (isClaimed) {
+                    btnHtml = `<button class="ach-claim-btn claimed" disabled>✓ Resgatado</button>`;
+                } else if (isReady) {
+                    btnHtml = `<button class="ach-claim-btn ready" onclick="claimAchievement('${ach.id}')">⭐ Resgatar</button>`;
+                } else {
+                    btnHtml = `<button class="ach-claim-btn locked" disabled>Bloqueado (${pct}%)</button>`;
+                }
+
+                card.innerHTML = `
+                    <div class="ach-icon-box">${ach.icon}</div>
+                    <div class="ach-info">
+                        <div class="ach-title-row">
+                            <span class="ach-title">${ach.title}</span>
+                            <span class="ach-reward-badge" style="color:${badgeColor}; border-color:${badgeColor};">${ach.reward_text}</span>
+                        </div>
+                        <div class="ach-desc">${ach.description} • Progresso: ${curStr} / ${tgtStr} (${pct}%)</div>
+                        <div class="ach-progress-outer">
+                            <div class="ach-progress-inner" style="width:${pct}%;"></div>
+                        </div>
+                    </div>
+                    <div>${btnHtml}</div>
+                `;
+                container.appendChild(card);
+            });
+        }
 
         function loadGame() {
             try {
@@ -871,6 +1271,11 @@
                             if (!f.base_dps) f.base_dps = f.dps || 25;
                             f.dps = calculateFighterDps(f.base_dps, f.level, f.passive_id);
                         });
+                        if (state.time_played === undefined) state.time_played = 0;
+                        if (state.coins_collected === undefined) state.coins_collected = 0;
+                        if (state.enemies_killed === undefined) state.enemies_killed = 0;
+                        if (state.gacha_spins === undefined) state.gacha_spins = 0;
+                        if (!state.claimed_achievements) state.claimed_achievements = [];
                     }
                 }
             } catch(e) {}
@@ -922,6 +1327,22 @@
         const rimLight = new THREE.DirectionalLight(0x55d6ff, 0.38);
         rimLight.position.set(-40, 30, -40);
         scene.add(rimLight);
+
+        
+        /* --- GRAPHICS ENHANCEMENT: CELESTIAL CLOUD SEA UNDER FLOATING ISLANDS --- */
+        const cloudSeaGeo = new THREE.PlaneGeometry(350, 1600, 32, 64);
+        const cloudSeaMat = new THREE.MeshPhongMaterial({
+            color: 0x1f3554,
+            emissive: 0x0f1d33,
+            shininess: 40,
+            transparent: true,
+            opacity: 0.88,
+            flatShading: true
+        });
+        const cloudSeaMesh = new THREE.Mesh(cloudSeaGeo, cloudSeaMat);
+        cloudSeaMesh.rotation.x = -Math.PI / 2;
+        cloudSeaMesh.position.set(0, -26, 450);
+        scene.add(cloudSeaMesh);
 
         /* --- SHARED GEOMETRIES & MATERIALS FOR HIGH PERFORMANCE --- */
         const shadowGeo = new THREE.CircleGeometry(0.65, 16);
@@ -1098,7 +1519,7 @@
             bossFloorRing.rotation.x = Math.PI / 2;
             bossFloorRing.position.set(0, 0.36, 0);
             islRoot.add(bossFloorRing);
-            animatedObjects.push({ mesh: bossFloorRing, type: 'spinZ', speed: 0.6 });
+            animatedObjects.push({ mesh: bossFloorRing, type: 'spinZ', speed: 0.6, island_id: i });
 
             // 4 Boss Arena Rune Pillars around Center
             [[-7.5, -7.5], [7.5, -7.5], [-7.5, 7.5], [7.5, 7.5]].forEach(pPos => {
@@ -1112,7 +1533,7 @@
                 );
                 brazier.position.set(pPos[0], 3.55, pPos[1]);
                 islRoot.add(brazier);
-                animatedObjects.push({ mesh: brazier, type: 'spinY', speed: 2.0 });
+                animatedObjects.push({ mesh: brazier, type: 'spinY', speed: 2.0, island_id: i });
             });
 
             // 1D. 4 Grand Corner Watchtowers with Pagoda Roofs & Beacons
@@ -1204,7 +1625,7 @@
                 cloud.add(c2);
                 cloud.position.set(cp[0], cp[1], cp[2]);
                 islRoot.add(cloud);
-                animatedObjects.push({ mesh: cloud, type: 'cloudDrift', baseX: cp[0], speed: 0.4 + cIdx * 0.1 });
+                animatedObjects.push({ mesh: cloud, type: 'cloudDrift', baseX: cp[0], speed: 0.4 + cIdx * 0.1, island_id: i });
             });
 
             // 2. Central Island Boss (Positioned at Center 0, 0, 0)
@@ -1244,7 +1665,7 @@
             const gachaCore = new THREE.Mesh(new THREE.OctahedronGeometry(0.68, 1), goldMat);
             gachaCore.position.y = 1.95;
             gachaGroup.add(gachaCore);
-            animatedObjects.push({ mesh: gachaCore, type: 'spinYBob', baseY: 1.95, speed: 2.2 });
+            animatedObjects.push({ mesh: gachaCore, type: 'spinYBob', baseY: 1.95, speed: 2.2, island_id: i });
 
             // Top Cap Roof
             const capTop = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.25, 0.45, 16), goldMat);
@@ -1280,7 +1701,7 @@
             );
             pmRing1.position.y = 2.3;
             pmGroup.add(pmRing1);
-            animatedObjects.push({ mesh: pmRing1, type: 'gyro1', speed: 1.8 });
+            animatedObjects.push({ mesh: pmRing1, type: 'gyro1', speed: 1.8, island_id: i });
 
             const pmRing2 = new THREE.Mesh(
                 new THREE.TorusGeometry(0.92, 0.05, 8, 24),
@@ -1288,14 +1709,14 @@
             );
             pmRing2.position.y = 2.3;
             pmGroup.add(pmRing2);
-            animatedObjects.push({ mesh: pmRing2, type: 'gyro2', speed: -2.2 });
+            animatedObjects.push({ mesh: pmRing2, type: 'gyro2', speed: -2.2, island_id: i });
 
             const crystalGeo = new THREE.OctahedronGeometry(0.65, 0);
             const crystalMat = new THREE.MeshPhongMaterial({ color: 0x00f2fe, emissive: 0x006677, shininess: 90 });
             const crystalMesh = new THREE.Mesh(crystalGeo, crystalMat);
             crystalMesh.position.y = 2.3;
             pmGroup.add(crystalMesh);
-            animatedObjects.push({ mesh: crystalMesh, type: 'spinYBob', baseY: 2.3, speed: 1.8 });
+            animatedObjects.push({ mesh: crystalMesh, type: 'spinYBob', baseY: 2.3, speed: 1.8, island_id: i });
 
             islRoot.add(pmGroup);
 
@@ -1340,7 +1761,7 @@
                 );
                 vortexDisc.position.y = 2.4;
                 portalGroup.add(vortexDisc);
-                animatedObjects.push({ mesh: portRing, type: 'spinZ', speed: 1.5 });
+                animatedObjects.push({ mesh: portRing, type: 'spinZ', speed: 1.5, island_id: i });
 
                 islRoot.add(portalGroup);
 
@@ -1838,23 +2259,46 @@
         }
 
         /* --- 3D HIT SLASH BURST PARTICLES --- */
+        /* --- OPTIMIZED REUSABLE PARTICLE POOL (Zero GC pauses & Lag-Free) --- */
+        const PARTICLE_POOL_SIZE = 48;
+        const particlePool = [];
+        const sparkGeo = new THREE.BoxGeometry(0.18, 0.18, 0.18);
+        for (let i = 0; i < PARTICLE_POOL_SIZE; i++) {
+            const pMat = new THREE.MeshBasicMaterial({ color: 0xffd32a });
+            const pMesh = new THREE.Mesh(sparkGeo, pMat);
+            pMesh.visible = false;
+            scene.add(pMesh);
+            particlePool.push({
+                mesh: pMesh,
+                material: pMat,
+                vel: new THREE.Vector3(),
+                life: 0,
+                active: false
+            });
+        }
+
         function spawnHitBurst3D(pos, colorHex) {
-            for (let i = 0; i < 4; i++) {
-                const spark = new THREE.Mesh(
-                    new THREE.BoxGeometry(0.16, 0.16, 0.16),
-                    new THREE.MeshBasicMaterial({ color: colorHex || 0xffd32a })
-                );
-                spark.position.copy(pos).add(new THREE.Vector3(
-                    (Math.random() - 0.5) * 0.9,
-                    0.9 + Math.random() * 0.9,
-                    (Math.random() - 0.5) * 0.9
-                ));
-                scene.add(spark);
-                hitParticles.push({
-                    mesh: spark,
-                    vel: new THREE.Vector3((Math.random() - 0.5) * 5, 2 + Math.random() * 4, (Math.random() - 0.5) * 5),
-                    life: 0.28
-                });
+            let spawned = 0;
+            for (let i = 0; i < particlePool.length && spawned < 4; i++) {
+                const p = particlePool[i];
+                if (!p.active) {
+                    p.active = true;
+                    p.life = 0.26;
+                    p.material.color.setHex(colorHex || 0xffd32a);
+                    p.mesh.position.copy(pos).add(new THREE.Vector3(
+                        (Math.random() - 0.5) * 0.8,
+                        0.9 + Math.random() * 0.8,
+                        (Math.random() - 0.5) * 0.8
+                    ));
+                    p.mesh.scale.set(1, 1, 1);
+                    p.mesh.visible = true;
+                    p.vel.set(
+                        (Math.random() - 0.5) * 4.5,
+                        2.2 + Math.random() * 3.5,
+                        (Math.random() - 0.5) * 4.5
+                    );
+                    spawned++;
+                }
             }
         }
 
@@ -1873,6 +2317,7 @@
             if (e.code === 'KeyI') toggleModal('modal-inventory');
             if (e.code === 'KeyM') toggleModal('modal-islands');
             if (e.code === 'KeyP') toggleModal('modal-passive');
+            if (e.code === 'KeyC') toggleModal('modal-achievements');
             if (e.code === 'KeyE') handleInteract();
             if (e.code === 'Escape' || e.code === 'KeyQ') clearTarget();
             if (e.code === 'Space' && isGrounded) {
@@ -2001,9 +2446,21 @@
             const delta = Math.min((now - lastTime) / 1000, 0.1);
             lastTime = now;
             const timeSec = now * 0.001;
+            state.time_played = (state.time_played || 0) + delta;
+            if (!window._achTimer) window._achTimer = 0;
+            window._achTimer += delta;
+            if (window._achTimer >= 1.0) {
+                window._achTimer = 0;
+                checkAchievementMilestones();
+            }
 
-            // Animate Island Props, Crystals, Gyro Rings & Clouds
+            // Subtle celestial wave oscillation
+            if (cloudSeaMesh) {
+                cloudSeaMesh.position.y = -26 + Math.sin(timeSec * 0.8) * 0.6;
+            }
+            // Animate Island Props, Crystals, Gyro Rings & Clouds (Optimized: ONLY current island)
             animatedObjects.forEach(obj => {
+                if (obj.island_id && obj.island_id !== state.current_island) return;
                 if (obj.type === 'spinYBob') {
                     obj.mesh.rotation.y += delta * obj.speed;
                     obj.mesh.position.y = obj.baseY + Math.sin(timeSec * 3.0) * 0.14;
@@ -2130,7 +2587,7 @@
                         pet.attack_timer += delta;
                         if (pet.attack_timer >= pet.attack_interval) {
                             pet.attack_timer = 0;
-                            const dmg = pet.dps * pet.attack_interval;
+                            const dmg = pet.dps * pet.attack_interval * getDamageMultiplier();
                             currentTarget.current_hp = Math.max(0, currentTarget.current_hp - dmg);
                             playSound('hit');
                             spawnDamageNumber(currentTarget.root.position, dmg, currentTarget.is_boss);
@@ -2239,11 +2696,17 @@
                 xpBonus += (p.xp_bonus || 0);
             });
 
-            const finalDrop = Math.floor(mob.drop * (1.0 + coinBonus));
+            // Apply Achievements Coin Multiplier (+0.25% per claimed coin tier)
+            const achCoinBonus = getAchievementBonus('coins');
+            const finalDrop = Math.floor(mob.drop * (1.0 + coinBonus + achCoinBonus));
             const finalXp = Math.floor(mob.xp * (1.0 + xpBonus));
 
             const currId = mob.currency_id;
             state.currencies[currId] = (state.currencies[currId] || 0) + finalDrop;
+            state.coins_collected = (state.coins_collected || 0) + finalDrop;
+            // 3ª Conquista: Inimigo morto (chefe ou inimigo comum) conta para enemies_killed
+            state.enemies_killed = (state.enemies_killed || 0) + 1;
+            checkAchievementMilestones();
             playSound('coin');
 
             const bossPrefix = mob.is_boss ? "👑 CHEFE DERROTADO! " : "";
@@ -2353,13 +2816,23 @@
 
             state.currencies[isl.currency_id] -= isl.capsule_cost;
 
-            // Exact probabilities: Common 60%, Rare 25%, Epic 10%, Legendary 4.5%, Mythic 0.5%
+            // 4ª Conquista: Giro de personagem na ilha (+0.25% de sorte por tier)
+            state.gacha_spins = (state.gacha_spins || 0) + 1;
+            checkAchievementMilestones();
+
+            // Apply Luck multiplier (+0.25% per claimed time & spin tier) exclusively to Island Character Pulls
+            const luck = getLuckMultiplier();
+            const mythicRate = Math.min(0.20, 0.005 * luck);
+            const legRate = Math.min(0.35, 0.045 * luck);
+            const epicRate = Math.min(0.40, 0.10 * luck);
+            const rareRate = Math.min(0.50, 0.25 * luck);
+
             const roll = Math.random();
             let rarity = RARITY_COMMON;
-            if (roll < 0.005) rarity = RARITY_MYTHIC;
-            else if (roll < 0.05) rarity = RARITY_LEGENDARY;
-            else if (roll < 0.15) rarity = RARITY_EPIC;
-            else if (roll < 0.40) rarity = RARITY_RARE;
+            if (roll < mythicRate) rarity = RARITY_MYTHIC;
+            else if (roll < mythicRate + legRate) rarity = RARITY_LEGENDARY;
+            else if (roll < mythicRate + legRate + epicRate) rarity = RARITY_EPIC;
+            else if (roll < mythicRate + legRate + epicRate + rareRate) rarity = RARITY_RARE;
 
             const pool = isl.fighters[rarity];
             const newFighter = {
@@ -2546,12 +3019,15 @@
             document.getElementById('modal-inventory').style.display = 'none';
             document.getElementById('modal-islands').style.display = 'none';
             document.getElementById('modal-passive').style.display = 'none';
+            const achModal = document.getElementById('modal-achievements');
+            if (achModal) achModal.style.display = 'none';
 
             if (!isVisible) {
                 modal.style.display = 'flex';
                 if (id === 'modal-inventory') renderInventoryGrid();
                 if (id === 'modal-islands') renderIslandsList();
                 if (id === 'modal-passive') renderPassiveModal();
+                if (id === 'modal-achievements') renderAchievementsModal();
             }
         }
 
@@ -2663,6 +3139,8 @@
         document.getElementById('btn-inventory').onclick = () => toggleModal('modal-inventory');
         document.getElementById('btn-islands').onclick = () => toggleModal('modal-islands');
         document.getElementById('btn-passives').onclick = () => openPassiveModal(state.current_island);
+        const btnAch = document.getElementById('btn-achievements');
+        if (btnAch) btnAch.onclick = () => toggleModal('modal-achievements');
         document.getElementById('btn-equip-best').onclick = equipBest;
         document.getElementById('modal-btn-equip-best').onclick = equipBest;
         document.getElementById('btn-save').onclick = saveGame;
@@ -2671,6 +3149,13 @@
         document.getElementById('modal-close-inv').onclick = () => toggleModal('modal-inventory');
         document.getElementById('modal-close-islands').onclick = () => toggleModal('modal-islands');
         document.getElementById('modal-close-passive').onclick = () => toggleModal('modal-passive');
+        const closeAch = document.getElementById('modal-close-achievements');
+        if (closeAch) closeAch.onclick = () => toggleModal('modal-achievements');
+
+        // Achievements category tab click listeners
+        document.querySelectorAll('.ach-tab-btn').forEach(btn => {
+            btn.onclick = () => setAchievementFilter(btn.dataset.cat);
+        });
 
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;

@@ -31,12 +31,18 @@ func save_game() -> bool:
 		return false
 		
 	var data: Dictionary = {
-		"version": 1,
+		"version": 2,
 		"currencies": GameManager.currencies,
 		"unlocked_islands": GameManager.unlocked_islands,
 		"current_island": GameManager.current_island,
 		"inventory": GameManager.inventory,
 		"equipped_fighters": GameManager.equipped_fighter_ids,
+		"time_played": GameManager.time_played,
+		"enemies_killed": GameManager.enemies_killed,
+		"coins_collected": GameManager.coins_collected,
+		"bosses_killed": GameManager.bosses_killed,
+		"gacha_spins": GameManager.gacha_spins,
+		"claimed_achievements": GameManager.claimed_achievements,
 		"timestamp": Time.get_unix_time_from_system()
 	}
 	
@@ -99,6 +105,21 @@ func load_game() -> bool:
 		GameManager.equipped_fighter_ids.clear()
 		for fid in data["equipped_fighters"]:
 			GameManager.equipped_fighter_ids.append(str(fid))
+			
+	if data.has("time_played"):
+		GameManager.time_played = float(data["time_played"])
+	if data.has("enemies_killed"):
+		GameManager.enemies_killed = int(data["enemies_killed"])
+	if data.has("coins_collected"):
+		GameManager.coins_collected = float(data["coins_collected"])
+	if data.has("bosses_killed"):
+		GameManager.bosses_killed = int(data["bosses_killed"])
+	if data.has("gacha_spins"):
+		GameManager.gacha_spins = int(data["gacha_spins"])
+	if data.has("claimed_achievements") and typeof(data["claimed_achievements"]) == TYPE_ARRAY:
+		GameManager.claimed_achievements.clear()
+		for a_id in data["claimed_achievements"]:
+			GameManager.claimed_achievements.append(str(a_id))
 			
 	game_loaded.emit()
 	return true

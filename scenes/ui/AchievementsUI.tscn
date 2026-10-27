@@ -1,0 +1,174 @@
+[gd_scene load_steps=5 format=3 uid="uid://c17achieveui001"]
+
+[ext_resource type="Script" path="res://scripts/ui/AchievementsUI.gd" id="1_achieveui"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_modal"]
+bg_color = Color(0.08, 0.09, 0.13, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.9, 0.75, 0.25, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_summary"]
+bg_color = Color(0.12, 0.14, 0.2, 0.85)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.35, 0.45, 0.65, 0.8)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="AchievementsUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_achieveui")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -440.0
+offset_top = -285.0
+offset_right = 440.0
+offset_bottom = 285.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_modal")
+
+[node name="Header" type="HBoxContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 18.0
+offset_top = 14.0
+offset_right = -18.0
+offset_bottom = 52.0
+grow_horizontal = 2
+
+[node name="TitleLabel" type="Label" parent="Panel/Header"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.25, 1)
+theme_override_font_sizes/font_size = 20
+text = "🏆 CONQUISTAS & RECOMPENSAS PERMANENTES"
+
+[node name="Spacer" type="Control" parent="Panel/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BtnClose" type="Button" parent="Panel/Header"]
+custom_minimum_size = Vector2(36, 34)
+layout_mode = 2
+text = "X"
+
+[node name="SummaryPanel" type="PanelContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 18.0
+offset_top = 56.0
+offset_right = -18.0
+offset_bottom = 98.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_summary")
+
+[node name="HBox" type="HBoxContainer" parent="Panel/SummaryPanel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="DamageBonusLabel" type="Label" parent="Panel/SummaryPanel/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.45, 0.45, 1)
+theme_override_font_sizes/font_size = 14
+text = "⚔️ Dano: +0%"
+
+[node name="XpBonusLabel" type="Label" parent="Panel/SummaryPanel/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.5, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "📈 XP: +0%"
+
+[node name="CoinBonusLabel" type="Label" parent="Panel/SummaryPanel/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 14
+text = "🪙 Moedas: +0%"
+
+[node name="LuckBonusLabel" type="Label" parent="Panel/SummaryPanel/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
+theme_override_font_sizes/font_size = 14
+text = "🍀 Sorte: +0%"
+
+[node name="CategoryTabs" type="HBoxContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 18.0
+offset_top = 106.0
+offset_right = -18.0
+offset_bottom = 140.0
+grow_horizontal = 2
+theme_override_constants/separation = 10
+
+[node name="TabAll" type="Button" parent="Panel/CategoryTabs"]
+custom_minimum_size = Vector2(100, 32)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "Todas (27)"
+
+[node name="TabTime" type="Button" parent="Panel/CategoryTabs"]
+custom_minimum_size = Vector2(130, 32)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "⏳ Tempo Jogado"
+
+[node name="TabCoins" type="Button" parent="Panel/CategoryTabs"]
+custom_minimum_size = Vector2(140, 32)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "🪙 Dinheiro Coletado"
+
+[node name="TabEnemies" type="Button" parent="Panel/CategoryTabs"]
+custom_minimum_size = Vector2(140, 32)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "⚔️ Inimigos Mortos"
+
+[node name="TabSpins" type="Button" parent="Panel/CategoryTabs"]
+custom_minimum_size = Vector2(140, 32)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "🎰 Giros de Personagem"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 18.0
+offset_top = 148.0
+offset_right = -18.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="AchievementsList" type="VBoxContainer" parent="Panel/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
