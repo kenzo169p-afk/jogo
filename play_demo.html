@@ -769,6 +769,7 @@
             if (!audioCtx) audioCtx = new AudioCtx();
         }
         function playSound(type) {
+            if (document.hidden) return;
             try {
                 initAudio();
                 const now = audioCtx.currentTime;
@@ -1271,6 +1272,16 @@
                             if (!f.base_dps) f.base_dps = f.dps || 25;
                             f.dps = calculateFighterDps(f.base_dps, f.level, f.passive_id);
                         });
+                        if (!Array.isArray(state.unlocked_islands) || state.unlocked_islands.length === 0) {
+                            state.unlocked_islands = [1];
+                        } else {
+                            state.unlocked_islands = state.unlocked_islands.map(x => Number(x)).filter(x => x >= 1 && x <= 10);
+                            if (!state.unlocked_islands.includes(1)) state.unlocked_islands.unshift(1);
+                        }
+                        state.current_island = Number(state.current_island) || 1;
+                        if (!ISLANDS[state.current_island] || !state.unlocked_islands.includes(state.current_island)) {
+                            state.current_island = 1;
+                        }
                         if (state.time_played === undefined) state.time_played = 0;
                         if (state.coins_collected === undefined) state.coins_collected = 0;
                         if (state.enemies_killed === undefined) state.enemies_killed = 0;
@@ -1294,7 +1305,7 @@
         scene.background = new THREE.Color(0x1b2a42);
         scene.fog = new THREE.FogExp2(0x1b2a42, 0.0052);
 
-        const camera = new THREE.PerspectiveCamera(68, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const camera = new THREE.PerspectiveCamera(68, window.innerWidth / window.innerHeight, 0.1, 2500);
         const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
@@ -1330,7 +1341,7 @@
 
         
         /* --- GRAPHICS ENHANCEMENT: CELESTIAL CLOUD SEA UNDER FLOATING ISLANDS --- */
-        const cloudSeaGeo = new THREE.PlaneGeometry(350, 1600, 32, 64);
+        const cloudSeaGeo = new THREE.PlaneGeometry(600, 6000, 32, 64);
         const cloudSeaMat = new THREE.MeshPhongMaterial({
             color: 0x1f3554,
             emissive: 0x0f1d33,
@@ -1341,7 +1352,7 @@
         });
         const cloudSeaMesh = new THREE.Mesh(cloudSeaGeo, cloudSeaMat);
         cloudSeaMesh.rotation.x = -Math.PI / 2;
-        cloudSeaMesh.position.set(0, -26, 450);
+        cloudSeaMesh.position.set(0, -26, -2250);
         scene.add(cloudSeaMesh);
 
         /* --- SHARED GEOMETRIES & MATERIALS FOR HIGH PERFORMANCE --- */
@@ -1467,6 +1478,55 @@
         const animatedObjects = []; // Rings, crystals, clouds, portals
         const hitParticles = [];
 
+        /* --- SCENERY-ONLY COLLISION (player vs. scenery; mobs, bosses & pets are NOT affected) --- */
+        const sceneryColliders = [];
+        const PLAYER_COLLISION_RADIUS = 0.55;
+        function addCircleCollider(islandId, lx, lz, r) {
+            sceneryColliders.push({ island_id: islandId, type: 'circle', x: lx, z: ISLANDS[islandId].z_pos + lz, r: r });
+        }
+        function addBoxCollider(islandId, lx, lz, hx, hz) {
+            sceneryColliders.push({ island_id: islandId, type: 'box', x: lx, z: ISLANDS[islandId].z_pos + lz, hx: hx, hz: hz });
+        }
+        function resolveSceneryCollisions(pos) {
+            const pr = PLAYER_COLLISION_RADIUS;
+            for (let pass = 0; pass < 2; pass++) {
+                for (let k = 0; k < sceneryColliders.length; k++) {
+                    const c = sceneryColliders[k];
+                    if (c.island_id !== state.current_island) continue;
+                    if (c.type === 'circle') {
+                        const dx = pos.x - c.x, dz = pos.z - c.z;
+                        const minD = c.r + pr;
+                        const d2 = dx * dx + dz * dz;
+                        if (d2 < minD * minD) {
+                            const d = Math.sqrt(d2) || 0.0001;
+                            const push = (minD - d) / d;
+                            pos.x += dx * push;
+                            pos.z += dz * push;
+                        }
+                    } else {
+                        const cx = Math.max(c.x - c.hx, Math.min(pos.x, c.x + c.hx));
+                        const cz = Math.max(c.z - c.hz, Math.min(pos.z, c.z + c.hz));
+                        const dx = pos.x - cx, dz = pos.z - cz;
+                        const d2 = dx * dx + dz * dz;
+                        if (d2 < pr * pr) {
+                            if (d2 > 1e-8) {
+                                const d = Math.sqrt(d2);
+                                const push = (pr - d) / d;
+                                pos.x += dx * push;
+                                pos.z += dz * push;
+                            } else {
+                                // Center inside box: push out along the shallowest axis
+                                const ox = (c.hx + pr) - Math.abs(pos.x - c.x);
+                                const oz = (c.hz + pr) - Math.abs(pos.z - c.z);
+                                if (ox < oz) pos.x += (pos.x >= c.x ? ox : -ox);
+                                else pos.z += (pos.z >= c.z ? oz : -oz);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         for (let i = 1; i <= 10; i++) {
             const island = ISLANDS[i];
             const islRoot = new THREE.Group();
@@ -1526,6 +1586,7 @@
                 const rPil = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.55, 3.2, 8), darkRockMat);
                 rPil.position.set(pPos[0], 1.6, pPos[1]);
                 islRoot.add(rPil);
+                addCircleCollider(i, pPos[0], pPos[1], 0.55);
 
                 const brazier = new THREE.Mesh(
                     new THREE.OctahedronGeometry(0.42, 0),
@@ -1541,6 +1602,7 @@
                 const towerBase = new THREE.Mesh(new THREE.BoxGeometry(4.2, 1.4, 4.2), stoneMat);
                 towerBase.position.set(pos[0], 0.7, pos[1]);
                 islRoot.add(towerBase);
+                addBoxCollider(i, pos[0], pos[1], 2.1, 2.1);
 
                 const towerCol = new THREE.Mesh(new THREE.BoxGeometry(3.0, 8.0, 3.0), darkRockMat);
                 towerCol.position.set(pos[0], 5.0, pos[1]);
@@ -1576,6 +1638,10 @@
             const bEast = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.3, 92), borderMat);
             bEast.position.set(46.5, 0.65, 0);
             islRoot.add(bEast);
+            addBoxCollider(i, 0, -46.5, 46, 0.6);
+            addBoxCollider(i, 0, 46.5, 46, 0.6);
+            addBoxCollider(i, -46.5, 0, 0.6, 46);
+            addBoxCollider(i, 46.5, 0, 0.6, 46);
 
             // 1F. Decorative Stylized Trees, Rocks, Torii Gate & Lanterns
             const isPalm = (i === 4);
@@ -1590,6 +1656,7 @@
                 const tree = createStylizedTree(island.tree_color, tc[2], isPalm);
                 tree.position.set(tc[0], 0, tc[1]);
                 islRoot.add(tree);
+                addCircleCollider(i, tc[0], tc[1], 0.5 * tc[2]);
             });
 
             // Low-poly boulder clusters
@@ -1599,6 +1666,7 @@
                 rock.position.set(rc[0], 0.6, rc[1]);
                 rock.rotation.set(idx, idx * 0.7, 0);
                 islRoot.add(rock);
+                addCircleCollider(i, rc[0], rc[1], (1.2 + (idx % 3) * 0.4) * 0.9);
             });
 
             // Entrance Arch / Torii Gate on South Spawn Path
@@ -1606,12 +1674,15 @@
             const gate = createToriiGate(gateColor);
             gate.position.set(0, 0, 18);
             islRoot.add(gate);
+            addCircleCollider(i, -3.2, 18, 0.5);
+            addCircleCollider(i, 3.2, 18, 0.5);
 
             // Stone Lanterns lining the avenue
             [[-4.2, 11], [4.2, 11], [-4.2, 24], [4.2, 24]].forEach(lp => {
                 const lant = createStoneLantern(island.tree_color);
                 lant.position.set(lp[0], 0, lp[1]);
                 islRoot.add(lant);
+                addBoxCollider(i, lp[0], lp[1], 0.45, 0.45);
             });
 
             // Floating 3D Sky Clouds around each island
@@ -1673,6 +1744,7 @@
             gachaGroup.add(capTop);
 
             islRoot.add(gachaGroup);
+            addCircleCollider(i, -28, 22, 1.6);
 
             interactiveStations.push({
                 type: 'capsule',
@@ -1719,6 +1791,7 @@
             animatedObjects.push({ mesh: crystalMesh, type: 'spinYBob', baseY: 2.3, speed: 1.8, island_id: i });
 
             islRoot.add(pmGroup);
+            addCircleCollider(i, -28, 8, 1.2);
 
             interactiveStations.push({
                 type: 'passive_machine',
@@ -1764,6 +1837,8 @@
                 animatedObjects.push({ mesh: portRing, type: 'spinZ', speed: 1.5, island_id: i });
 
                 islRoot.add(portalGroup);
+                addBoxCollider(i, 26.0, 22, 0.33, 0.33);
+                addBoxCollider(i, 30.0, 22, 0.33, 0.33);
 
                 interactiveStations.push({
                     type: 'portal',
@@ -1773,9 +1848,12 @@
                 });
             }
 
-            // 6. 3 Standard Mobs per island
+            // 6. 3 Standard Mobs per island (with stone spawn rings so spawn zones are clearly visible on every island)
             const mobOffsets = [[-26, -18], [26, -18], [0, -32]];
             mobOffsets.forEach((off) => {
+                const pad = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.9, 0.14, 16), stoneMat);
+                pad.position.set(off[0], 0.07, off[1]);
+                islRoot.add(pad);
                 const mob = createMob(i, new THREE.Vector3(off[0], 0, island.z_pos + off[1]));
                 mobsList.push(mob);
             });
@@ -2370,7 +2448,7 @@
             mouseVec.y = -(clientY / window.innerHeight) * 2 + 1;
             raycaster.setFromCamera(mouseVec, camera);
 
-            const mobRoots = mobsList.filter(m => !m.is_dead && m.island_id === state.current_island).map(m => m.root);
+            const mobRoots = mobsList.filter(m => !m.is_dead && m.root.visible).map(m => m.root);
             const intersects = raycaster.intersectObjects(mobRoots, true);
 
             if (intersects.length > 0) {
@@ -2414,6 +2492,7 @@
 
         /* --- DAMAGE NUMBERS POPUP --- */
         function spawnDamageNumber(pos3D, damage, isBoss) {
+            if (document.hidden) return;
             const screenPos = pos3D.clone().add(new THREE.Vector3(0, isBoss ? 3.2 : 1.8, 0)).project(camera);
             const x = (screenPos.x * 0.5 + 0.5) * window.innerWidth;
             const y = (-(screenPos.y * 0.5) + 0.5) * window.innerHeight;
@@ -2438,14 +2517,11 @@
         const sprintDot = document.getElementById('sprint-active-dot');
         const sprintLabel = document.getElementById('sprint-label');
 
-        /* --- GAME LOOP --- */
+        /* --- GAME LOOP & BACKGROUND EXECUTION (Runs even when tab/window is minimized or unfocused) --- */
         let lastTime = performance.now();
+        let bgSaveAccum = 0;
 
-        function animate(now) {
-            requestAnimationFrame(animate);
-            const delta = Math.min((now - lastTime) / 1000, 0.1);
-            lastTime = now;
-            const timeSec = now * 0.001;
+        function stepSimulation(delta, timeSec) {
             state.time_played = (state.time_played || 0) + delta;
             if (!window._achTimer) window._achTimer = 0;
             window._achTimer += delta;
@@ -2520,6 +2596,7 @@
 
                 playerRoot.position.x += worldX * moveSpeed * delta;
                 playerRoot.position.z += worldZ * moveSpeed * delta;
+                resolveSceneryCollisions(playerRoot.position);
 
                 playerRoot.rotation.y = Math.atan2(-worldX, -worldZ);
 
@@ -2578,24 +2655,27 @@
                     const spot = currentTarget.root.position.clone().add(
                         new THREE.Vector3(Math.cos(angle) * radius, 0.45 + Math.abs(Math.sin(timeSec * 12 + pet.index)) * 0.22, Math.sin(angle) * radius)
                     );
-                    pet.root.position.lerp(spot, delta * 12);
+                    pet.root.position.lerp(spot, Math.min(1.0, delta * 12));
                     pet.root.lookAt(currentTarget.root.position.x, pet.root.position.y, currentTarget.root.position.z);
 
                     const distToMob = pet.root.position.distanceTo(currentTarget.root.position);
                     const range = currentTarget.is_boss ? 4.0 : 2.6;
-                    if (distToMob < range) {
+                    if (distToMob < range || document.hidden) {
                         pet.attack_timer += delta;
-                        if (pet.attack_timer >= pet.attack_interval) {
-                            pet.attack_timer = 0;
+                        while (pet.attack_timer >= pet.attack_interval && currentTarget && !currentTarget.is_dead) {
+                            pet.attack_timer -= pet.attack_interval;
                             const dmg = pet.dps * pet.attack_interval * getDamageMultiplier();
                             currentTarget.current_hp = Math.max(0, currentTarget.current_hp - dmg);
                             playSound('hit');
                             spawnDamageNumber(currentTarget.root.position, dmg, currentTarget.is_boss);
-                            spawnHitBurst3D(currentTarget.root.position, pet.color);
+                            if (!document.hidden) {
+                                spawnHitBurst3D(currentTarget.root.position, pet.color);
+                            }
                             updateTargetUI();
 
                             if (currentTarget.current_hp <= 0) {
                                 killMob(currentTarget);
+                                break;
                             }
                         }
                     }
@@ -2622,12 +2702,8 @@
                 }
             });
 
-            // 5. MOBS UPDATE, ANIMATION & 3D HP BAR BILLBOARD
+            // 5. MOBS UPDATE, ANIMATION & 3D HP BAR BILLBOARD (All 10 islands stay populated & active)
             mobsList.forEach(mob => {
-                if (mob.island_id !== state.current_island) {
-                    mob.root.visible = false;
-                    return;
-                }
                 if (mob.is_dead) {
                     mob.respawn_timer -= delta;
                     if (mob.respawn_timer <= 0) {
@@ -2637,9 +2713,13 @@
                         mob.root.scale.set(1, 1, 1);
                         mob.root.visible = true;
                     }
-                } else {
-                    mob.root.visible = true;
+                    return;
+                }
 
+                mob.root.visible = true;
+
+                // Only run detailed per-frame limb/billboard animation for mobs on the current or adjacent island for 60+ FPS
+                if (Math.abs(mob.island_id - state.current_island) <= 1) {
                     // Update 3D Overhead Health Bar & Billboard to Camera
                     if (mob.hpBarGroup && mob.hpBarFill) {
                         mob.hpBarGroup.lookAt(camera.position);
@@ -2676,10 +2756,83 @@
             });
 
             // 6. CHECK INTERACTION PROXIMITY
-            checkInteractionProximity();
+            if (!document.hidden) {
+                checkInteractionProximity();
+            }
 
-            renderer.render(scene, camera);
+            // Periodic silent auto-save every 15 seconds (including in background)
+            bgSaveAccum += delta;
+            if (bgSaveAccum >= 15.0) {
+                bgSaveAccum = 0;
+                try { localStorage.setItem("anime_fighters_save", JSON.stringify(state)); } catch (e) {}
+            }
         }
+
+        function processGameTick(now) {
+            if (now === undefined) now = performance.now();
+            let rawDelta = (now - lastTime) / 1000;
+            if (rawDelta <= 0) return;
+            lastTime = now;
+
+            // Cap maximum catch-up to 300s (5 min) per tick and step in <= 0.05s chunks so combat/respawns/timers stay exact
+            let remaining = Math.min(rawDelta, 300.0);
+            const maxStep = 0.05;
+            while (remaining > 0.0001) {
+                const step = Math.min(remaining, maxStep);
+                const simTimeSec = (now - remaining * 1000) * 0.001;
+                stepSimulation(step, simTimeSec);
+                remaining -= step;
+            }
+
+            if (!document.hidden) {
+                renderer.render(scene, camera);
+            }
+        }
+
+        function animate(now) {
+            requestAnimationFrame(animate);
+            if (!document.hidden) {
+                processGameTick(now);
+            }
+        }
+
+        // Dedicated Web Worker + Fallback Timer so the game keeps running at full speed in background tabs/minimized windows
+        (function setupBackgroundRunner() {
+            try {
+                const workerCode = "setInterval(() => postMessage('tick'), 50);";
+                const blob = new Blob([workerCode], { type: "application/javascript" });
+                const bgWorker = new Worker(URL.createObjectURL(blob));
+                bgWorker.onmessage = () => {
+                    if (document.hidden) {
+                        processGameTick(performance.now());
+                    }
+                };
+            } catch (e) {}
+
+            // Fallback interval in case Worker is restricted or throttled
+            setInterval(() => {
+                if (document.hidden || !document.hasFocus()) {
+                    processGameTick(performance.now());
+                }
+            }, 100);
+
+            document.addEventListener("visibilitychange", () => {
+                processGameTick(performance.now());
+                if (document.hidden) {
+                    // Clear held movement keys so the player doesn't walk indefinitely while alt-tabbed
+                    for (let k in keys) keys[k] = false;
+                    isRightMouseDown = false;
+                    try { localStorage.setItem("anime_fighters_save", JSON.stringify(state)); } catch (e) {}
+                } else {
+                    updateHUD();
+                }
+            });
+
+            window.addEventListener("blur", () => {
+                for (let k in keys) keys[k] = false;
+                isRightMouseDown = false;
+            });
+        })();
 
         /* --- MOB DEATH & DROP (5x Boss Coins, 2x Common Mob Coins, 5x Boss XP, Leveling loop) --- */
         function killMob(mob) {
@@ -2747,8 +2900,6 @@
         function checkInteractionProximity() {
             let found = null;
             for (let st of interactiveStations) {
-                if (st.island_id !== undefined && st.island_id !== state.current_island) continue;
-                if (st.type === 'portal' && (st.target_island_id - 1) !== state.current_island) continue;
                 const dist = playerRoot.position.distanceTo(st.position);
                 if (dist < 4.6) {
                     found = st;
@@ -2962,7 +3113,7 @@
         function updateIslandsVisibility(currentId) {
             for (let i = 1; i <= 10; i++) {
                 if (islandRoots[i]) {
-                    islandRoots[i].visible = (i === currentId);
+                    islandRoots[i].visible = true;
                 }
             }
             const isl = ISLANDS[currentId] || ISLANDS[1];
@@ -2971,20 +3122,31 @@
                 scene.fog.color.setHex(isl.sky_color);
             }
             mobsList.forEach(m => {
-                m.root.visible = (m.island_id === currentId && !m.is_dead);
+                m.root.visible = !m.is_dead;
+                if (!m.is_dead && m.hpBarGroup) {
+                    m.hpBarGroup.lookAt(camera.position);
+                }
             });
         }
 
         /* --- TELEPORT TO ISLAND --- */
-        function teleportToIsland(id) {
-            const isl = ISLANDS[id];
-            state.current_island = id;
+        function teleportToIsland(id, silent = false) {
+            const isl = ISLANDS[id] || ISLANDS[1];
+            state.current_island = isl.id;
             playerRoot.position.set(0, 0, isl.z_pos + 25);
+            playerVelY = 0;
+            isGrounded = true;
             dirLight.position.set(38, 75, isl.z_pos + 32);
             dirLight.target.position.set(0, 0, isl.z_pos);
-            updateIslandsVisibility(id);
+            dirLight.target.updateMatrixWorld();
+            petMeshes.forEach((pet, idx) => {
+                pet.root.position.set((idx - 1) * 1.8, 0.55, isl.z_pos + 27);
+            });
+            updateIslandsVisibility(isl.id);
             clearTarget();
-            showNotification(`Viajou para: ${isl.name}`, "#3498db");
+            if (!silent) {
+                showNotification(`Viajou para: ${isl.name}`, "#3498db");
+            }
             updateHUD();
         }
 
@@ -3102,7 +3264,7 @@
 
                 let actionHtml = '';
                 if (isCurrent) {
-                    actionHtml = `<span style="color:#2ecc71; font-weight:bold;">[Aqui]</span>`;
+                    actionHtml = `<span style="color:#2ecc71; font-weight:bold; margin-right:8px;">[Aqui]</span><button class="btn" style="padding:6px 12px;" onclick="teleportToIsland(${i}); toggleModal('modal-islands');">Teleportar</button>`;
                 } else if (isUnlocked) {
                     actionHtml = `<button class="btn" style="padding:6px 14px;" onclick="teleportToIsland(${i}); toggleModal('modal-islands');">Teleportar</button>`;
                 } else {
@@ -3163,10 +3325,10 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // Initialize scene
+        // Initialize scene & sync player position to current island
         updateFighterMeshes();
+        teleportToIsland(state.current_island || 1, true);
         updateHUD();
-        updateIslandsVisibility(state.current_island || 1);
         requestAnimationFrame(animate);
     </script>
 </body>

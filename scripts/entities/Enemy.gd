@@ -53,9 +53,10 @@ func _ready() -> void:
 		health_bar_3d.texture = viewport.get_texture()
 	GameManager.target_changed.connect(_on_target_changed)
 	if spawn_origin == Vector3.ZERO:
-		spawn_origin = global_position
-	_pick_new_patrol_point()
-	_update_ui()
+		setup(island_id, global_position)
+	else:
+		_pick_new_patrol_point()
+		_update_ui()
 
 func _process(delta: float) -> void:
 	if _is_dead:

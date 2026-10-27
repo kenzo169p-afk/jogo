@@ -34,11 +34,27 @@ var _mesh_border_h: BoxMesh
 var _mesh_border_v: BoxMesh
 var _col_shape_ground: BoxShape3D
 
+# Scenery-only collision (physics layer 3 / bit value 4). Only the Player masks this layer,
+# so enemies, bosses and fighters are never blocked by the scenery.
+const SCENERY_COLLISION_LAYER: int = 4
+var _col_shape_corner: BoxShape3D
+var _col_shape_trunk: CylinderShape3D
+var _col_shape_border_h: BoxShape3D
+var _col_shape_border_v: BoxShape3D
+
 func _ready() -> void:
 	_init_shared_meshes()
 	_build_islands()
 	GameManager.island_changed.connect(_on_island_changed)
+	_sync_player_to_current_island()
 	_update_islands_visibility(GameManager.current_island)
+
+func _sync_player_to_current_island() -> void:
+	if not IslandData.ISLANDS.has(GameManager.current_island) or not GameManager.is_island_unlocked(GameManager.current_island):
+		GameManager.current_island = 1
+	var island_info = IslandData.get_island(GameManager.current_island)
+	if player and is_instance_valid(player):
+		player.global_position = island_info["world_position"] + Vector3(0, 1.5, 25)
 
 func _init_shared_meshes() -> void:
 	_mesh_ground = BoxMesh.new()
@@ -88,6 +104,31 @@ func _init_shared_meshes() -> void:
 	
 	_col_shape_ground = BoxShape3D.new()
 	_col_shape_ground.size = Vector3(95.0, 2.0, 95.0)
+	
+	# Shared scenery collision shapes (allocated once, reused by all 10 islands)
+	_col_shape_corner = BoxShape3D.new()
+	_col_shape_corner.size = Vector3(3.2, 8.0, 3.2)
+	
+	_col_shape_trunk = CylinderShape3D.new()
+	_col_shape_trunk.radius = 0.6
+	_col_shape_trunk.height = 3.2
+	
+	# Perimeter walls are taller than the visual mesh so the player can't jump off the island
+	_col_shape_border_h = BoxShape3D.new()
+	_col_shape_border_h.size = Vector3(92.0, 6.0, 1.2)
+	
+	_col_shape_border_v = BoxShape3D.new()
+	_col_shape_border_v.size = Vector3(1.2, 6.0, 92.0)
+
+func _add_scenery_collider(parent: Node3D, shape: Shape3D, pos: Vector3) -> void:
+	var body = StaticBody3D.new()
+	body.collision_layer = SCENERY_COLLISION_LAYER
+	body.collision_mask = 0
+	body.position = pos
+	var col = CollisionShape3D.new()
+	col.shape = shape
+	body.add_child(col)
+	parent.add_child(body)
 
 func _create_toon_material(color: Color, roughness: float = 0.65, rim: float = 0.3) -> StandardMaterial3D:
 	var mat = StandardMaterial3D.new()
@@ -104,13 +145,12 @@ func _create_toon_material(color: Color, roughness: float = 0.65, rim: float = 0
 func _on_island_changed(new_island_id: int) -> void:
 	_update_islands_visibility(new_island_id)
 
-func _update_islands_visibility(current_id: int) -> void:
-	# Only render and process the island the player is currently on
+func _update_islands_visibility(_current_id: int) -> void:
+	# Keep all 10 islands, their enemies, bosses and interactive stations visible and active
 	for id in islands_dict:
 		var island_node = islands_dict[id]
-		var is_active = (id == current_id)
-		island_node.visible = is_active
-		island_node.process_mode = Node.PROCESS_MODE_INHERIT if is_active else Node.PROCESS_MODE_DISABLED
+		island_node.visible = true
+		island_node.process_mode = Node.PROCESS_MODE_INHERIT
 
 func _build_islands() -> void:
 	for island_id in IslandData.ISLANDS:
@@ -168,6 +208,7 @@ func _build_islands() -> void:
 		boss.island_id = island_id
 		boss.position = Vector3(0.0, 1.0, 0.0)
 		island_root.add_child(boss)
+		boss.setup(island_id, boss.global_position)
 
 		# 5. Gacha Capsule Station
 		var capsule = capsule_scene.instantiate()
@@ -250,6 +291,7 @@ func _build_island_decorations(island_node: Node3D, base_color: Color, island_id
 		p.material_override = pillar_mat
 		p.position = pos
 		island_node.add_child(p)
+		_add_scenery_collider(island_node, _col_shape_corner, pos)
 		
 		var roof = MeshInstance3D.new()
 		roof.mesh = _mesh_cap
@@ -280,6 +322,7 @@ func _build_island_decorations(island_node: Node3D, base_color: Color, island_id
 		trunk.material_override = trunk_mat
 		trunk.position = tpos + Vector3(0, 1.6, 0)
 		island_node.add_child(trunk)
+		_add_scenery_collider(island_node, _col_shape_trunk, tpos + Vector3(0, 1.6, 0))
 		
 		var crown = MeshInstance3D.new()
 		crown.mesh = _mesh_crown
@@ -311,3 +354,9 @@ func _build_island_decorations(island_node: Node3D, base_color: Color, island_id
 	border_east.material_override = pillar_mat
 	border_east.position = Vector3(47.0, 0.65, 0)
 	island_node.add_child(border_east)
+	
+	# Scenery collision for the perimeter walls (keeps the player on the island)
+	_add_scenery_collider(island_node, _col_shape_border_h, Vector3(0, 3.0, -47.0))
+	_add_scenery_collider(island_node, _col_shape_border_h, Vector3(0, 3.0, 47.0))
+	_add_scenery_collider(island_node, _col_shape_border_v, Vector3(-47.0, 3.0, 0))
+	_add_scenery_collider(island_node, _col_shape_border_v, Vector3(47.0, 3.0, 0))

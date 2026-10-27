@@ -10,6 +10,8 @@ config/name="Anime Fighters Simulator"
 run/main_scene="res://scenes/main/World.tscn"
 config/features=PackedStringArray("4.2", "4.3", "GL Compatibility")
 config/icon="res://icon.svg"
+run/low_processor_mode=false
+run/delta_smoothing=false
 
 [autoload]
 

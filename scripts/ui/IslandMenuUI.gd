@@ -61,6 +61,14 @@ func refresh_islands() -> void:
 			cur_lbl.modulate = Color(0.3, 1.0, 0.5)
 			cur_lbl.add_theme_font_size_override("font_size", 14)
 			hbox.add_child(cur_lbl)
+			var btn_tp_cur = Button.new()
+			btn_tp_cur.text = "Teleportar"
+			btn_tp_cur.custom_minimum_size = Vector2(100, 36)
+			btn_tp_cur.pressed.connect(func():
+				GameManager.teleport_to_island(id_val)
+				visible = false
+			)
+			hbox.add_child(btn_tp_cur)
 		elif is_unlocked:
 			var btn_tp = Button.new()
 			btn_tp.text = "Teleportar"

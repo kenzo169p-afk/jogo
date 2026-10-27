@@ -155,6 +155,7 @@ func _raycast_select_target(screen_pos: Vector2) -> void:
 	var query = PhysicsRayQueryParameters3D.create(ray_origin, ray_end)
 	query.collide_with_areas = true
 	query.collide_with_bodies = true
+	query.collision_mask = 0xFFFFFFFF & ~4 # ignore scenery collision layer
 	
 	var result = space_state.intersect_ray(query)
 	if result:

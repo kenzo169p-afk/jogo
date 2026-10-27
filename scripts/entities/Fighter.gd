@@ -130,12 +130,12 @@ func _process_attack_state(delta: float, target: Node) -> void:
 	if global_position.distance_squared_to(enemy_pos) > 0.01:
 		look_at(enemy_pos, Vector3.UP)
 		
-	# Attack damage loop
+	# Attack damage loop (while loop supports background/minimized frame catch-up)
 	var dist_to_enemy = global_position.distance_to(target.global_position)
 	if dist_to_enemy <= ATTACK_RANGE + 0.8:
 		attack_timer += delta
-		if attack_timer >= current_attack_interval:
-			attack_timer = 0.0
+		while attack_timer >= current_attack_interval and is_instance_valid(target) and not (target.has_method("is_dead") and target.is_dead()):
+			attack_timer -= current_attack_interval
 			_strike(target)
 
 func _strike(target: Node) -> void:

@@ -37,6 +37,9 @@ var current_target: Node = null
 var player_ref: Node = null
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	get_tree().auto_accept_quit = true
+	OS.low_processor_usage_mode = false
 	_init_currencies()
 	if not SaveManager.load_game():
 		_init_starter_pack()

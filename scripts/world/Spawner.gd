@@ -25,8 +25,9 @@ func _spawn_enemy() -> void:
 		return
 		
 	var enemy = enemy_scene.instantiate()
-	enemy.position = position
-	get_parent().add_child(enemy)
+	enemy.island_id = island_id
+	enemy.position = Vector3.ZERO
+	add_child(enemy)
 	enemy.setup(island_id, global_position)
 	enemy.died.connect(_on_enemy_died)
 	current_enemy = enemy
